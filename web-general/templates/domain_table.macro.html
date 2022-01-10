@@ -1,0 +1,125 @@
+{% from 'ruler.macro.html' import ruler %}
+{% macro sort_url(title, sort, context, page=1) %}
+<a href="{{ url_for('index', more=context['more'], search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], phrase=context['phrase'], sort=sort, page=page) }}">{{title}}</a>
+{% endmacro %}
+
+{% macro paginate(context, num_results, per_page, current_page) %}
+
+{% endmacro %}
+
+
+{% macro domain_table(domains, sortable=False, context=None, extra=None, extra_args=None) %}
+	<table id="dt-material-checkbox" class="domain_list table table-striped" cellspacing="0" width="100%">
+		<thead>
+		{% if not sortable %}
+			<tr>
+				<th class="th-sm">Domain</th>
+				<th class="th-sm">Title</th>
+				<th class="th-sm">Updated</th>
+			</tr>
+		{% else %}
+		<tr>
+				<th class="th-sm">{{sort_url("Domain", "domain", context, 1) }}</th>
+				<th class="th-sm">{{sort_url("Title", "title", context, 1) }}</th>
+				<th class="th-sm">{{sort_url("Updated", "last_seen", context, 1) }}</th>
+			</tr>
+		{% endif %}
+		</thead>
+		<tbody>
+{% for domain in domains %}
+			<tr class="{{domain.status()}}">
+				<td class="domain">
+					<a href="{{domain.index_url()}}">{{domain.host}}</a>
+				</td>
+				<td class="title">
+					{{domain.title}} 
+				    {% if domain.is_genuine %}
+				    <span class="tag genuine">[G]</span>
+				    {% endif %}
+				    {% if domain.is_fake %}
+				    <span class="tag fake">[F]</span>
+				    {% endif %}
+				    {% if extra %}
+				    {{extra(domain, extra_args)}}
+				    {% endif %}
+
+				</td>
+				<td class="last_seen {{'never ' if Domain.time_ago(domain.last_alive)=='Never' else ''}}ago">
+					{{Domain.time_ago(domain.last_alive)}}
+				</td>
+			</tr>
+{% endfor %}
+		</tbody>
+	</table>
+{% endmacro %}
+
+{% macro domain_fulltext_table(domains, results, sortable=False, context=None) %}
+	<table id="dt-material-checkbox" class="domain_list table table-striped" cellspacing="0" width="100%">
+		<thead>
+		{% if not sortable %}
+			<tr>
+				<th class="th-sm">Domain</th>
+				<th class="th-sm">Title</th>
+				<th class="th-sm">Updated</th>
+			</tr>
+		{% else %}
+		<tr>
+				<th class="th-sm">Domain</th>
+				<th class="th-sm">Title</th>
+				<th class="th-sm">Updated</th>
+			</tr>
+		{% endif %}
+		</thead>
+		<tbody>
+{% for domain in domains %}
+			<tr class="{{domain.status()}}">
+				<td class="domain">
+					{{domain.host}}
+				</td>
+				<td class="title">
+					{{domain.title}}
+				    {% if domain.is_genuine %}
+				    <span class="tag genuine">[G]</span>
+				    {% endif %}
+				    {% if domain.is_fake %}
+				    <span class="tag fake">[F]</span>
+				    {% endif %}
+				    {% if extra %}
+				    {{extra(domain, extra_args)}}
+				    {% endif %}
+
+				</td>
+				<td class="last_seen {{'never ' if Domain.time_ago(domain.last_alive)=='Never' else ''}}ago">
+					{{Domain.time_ago(domain.last_alive)}}
+				</td>
+			</tr>
+{% endfor %}
+{% for hit in results.hits %}
+{% set domain = Domain.get(id=hit.domain_id) %}
+{% if domain != None %}
+			<tr class="{{domain.status()}}">
+				<td class="domain">
+					{{domain.host}}
+				</td>
+				<td class="title">
+					<a href="{{hit.meta.id}}" class="title_link">{{hit.title if hit.title.strip()!="" else "No Title"}}</a> 
+				    {% if domain.is_genuine %}
+				    <span class="tag genuine">[G]</span>
+				    {% endif %}
+				    {% if domain.is_fake %}
+				    <span class="tag fake">[F]</span>
+				    {% endif %}<br/>
+
+				</td>
+				<td class="last_seen {{'never ' if Domain.time_ago(domain.last_alive)=='Never' else ''}}ago">
+					{{Domain.time_ago(domain.last_alive)}}
+				</td>
+			</tr>
+{% endif %}
+{% endfor %}
+		</tbody>
+	</table>
+{% endmacro %}
+
+
+

@@ -1,0 +1,199 @@
+#Containers' name can't contain _ (underscore) because scrapy is not able to handle it.
+version: '3.2'
+
+services:
+  
+  elasticsearch1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION}
+    environment:
+     - cluster.name=docker-cluster
+     - node.name=elasticsearch1
+     - "ES_JAVA_OPTS=-Xmx16g -Xms16g"
+    #  - ELASTIC_PASSWORD=reZeP6crgHBGVsKeAFyWnduTzcwyB4qR
+    #  - xpack.monitoring.collection.enabled=true
+    #  - xpack.monitoring.exporters.remote.type=http
+    #  - xpack.monitoring.exporters.remote.host=monitor
+     - discovery.seed_hosts=elasticsearch1,elasticsearch2
+     - cluster.initial_master_nodes=elasticsearch1,elasticsearch2
+    #  - xpack.license.self_generated.type=basic
+    #  - xpack.security.enabled=true
+    #  - xpack.security.http.ssl.enabled=true
+    #  - xpack.security.http.ssl.key=$ELK_CERTS_DIR/elasticsearch1/elasticsearch1.key
+    #  - xpack.security.http.ssl.certificate_authorities=$ELK_CERTS_DIR/ca/ca.crt
+    #  - xpack.security.http.ssl.certificate=$ELK_CERTS_DIR/elasticsearch1/elasticsearch1.crt
+    #  - xpack.security.transport.ssl.enabled=true 
+    #  - xpack.security.transport.ssl.verification_mode=certificate 
+    #  - xpack.security.transport.ssl.certificate_authorities=$ELK_CERTS_DIR/ca/ca.crt
+    #  - xpack.security.transport.ssl.certificate=$ELK_CERTS_DIR/elasticsearch1/elasticsearch1.crt
+    #  - xpack.security.transport.ssl.key=$ELK_CERTS_DIR/elasticsearch1/elasticsearch1.key
+     - indices.query.bool.max_clause_count=10240
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /work/storage1/enigma-volume/elasticsearch1:/usr/share/elasticsearch/data
+      - ./elk-certs:$ELK_CERTS_DIR
+    ports:
+      - "127.0.0.1:9200:9200"
+    container_name: "nexvisions-torscraper-elasticsearch1"
+
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION}
+    environment:
+     - cluster.name=docker-cluster
+     - node.name=elasticsearch2
+     - "ES_JAVA_OPTS=-Xmx16g -Xms16g"
+    #  - ELASTIC_PASSWORD=reZeP6crgHBGVsKeAFyWnduTzcwyB4qR
+    #  - xpack.monitoring.collection.enabled=true
+    #  - xpack.monitoring.exporters.remote.type=http
+    #  - xpack.monitoring.exporters.remote.host=monitor
+     - discovery.seed_hosts=elasticsearch1,elasticsearch2
+     - cluster.initial_master_nodes=elasticsearch1,elasticsearch2
+    #  - xpack.license.self_generated.type=basic
+    #  - xpack.security.enabled=true
+    #  - xpack.security.http.ssl.enabled=true
+    #  - xpack.security.http.ssl.key=$ELK_CERTS_DIR/elasticsearch2/elasticsearch2.key
+    #  - xpack.security.http.ssl.certificate_authorities=$ELK_CERTS_DIR/ca/ca.crt
+    #  - xpack.security.http.ssl.certificate=$ELK_CERTS_DIR/elasticsearch2/elasticsearch2.crt
+    #  - xpack.security.transport.ssl.enabled=true 
+    #  - xpack.security.transport.ssl.verification_mode=certificate 
+    #  - xpack.security.transport.ssl.certificate_authorities=$ELK_CERTS_DIR/ca/ca.crt
+    #  - xpack.security.transport.ssl.certificate=$ELK_CERTS_DIR/elasticsearch2/elasticsearch2.crt
+    #  - xpack.security.transport.ssl.key=$ELK_CERTS_DIR/elasticsearch2/elasticsearch2.key
+     - indices.query.bool.max_clause_count=10240
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /work/storage2/enigma-volume/elasticsearch2:/usr/share/elasticsearch/data
+      - ./elk-certs:$ELK_CERTS_DIR
+    # ports:
+    #   - "127.0.0.1:9201:9200"
+    container_name: "nexvisions-torscraper-elasticsearch2"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELK_VERSION}
+    environment:
+     - ELASTICSEARCH_URL=http://elasticsearch1:9200
+     - ELASTICSEARCH_HOSTS=http://elasticsearch1:9200
+     - NODE_OPTIONS="--max-old-space-size=8192"  
+    #  - xpack.monitoring.ui.container.elasticsearch.enabled=true 
+    #  - xpack.security.transport.ssl.verification_mode=certificate  
+     - elasticsearch.requestTimeout=300000 
+     - elasticsearch.startupTimeout=500000  
+    #  - ELASTICSEARCH_USERNAME=
+    #  - ELASTICSEARCH_PASSWORD=
+    #  - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=$ELK_CERTS_DIR/ca/ca.crt
+    #  - SERVER_SSL_ENABLED=true
+    #  - SERVER_SSL_KEY=$ELK_CERTS_DIR/kibana/kibana.key
+    #  - SERVER_SSL_CERTIFICATE=$ELK_CERTS_DIR/kibana/kibana.crt
+    volumes:
+      - ./elk-certs:$ELK_CERTS_DIR
+    ports:
+      - "127.0.0.1:5601:5601"
+    restart: always
+    container_name: "nexvisions-torscraper-kibana"
+
+  web-general:
+    build: web-general
+    restart: always
+    ports:
+      - "127.0.0.1:7000:5000"
+    volumes:
+      - ./etc:/opt/torscraper/etc:ro
+      - ./scripts:/opt/torscraper/scripts:ro
+      - ./lib:/opt/torscraper/lib:ro
+      - ./web-general:/opt/torscraper/web
+    depends_on:
+      - db
+      - elasticsearch1
+      - elasticsearch2
+    container_name: "nexvisions-torscraper-web-general"
+
+  db:
+    build: db
+    # uncomment if you want database to persist
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - /work/storage0/enigma-volume/mysqldb:/var/lib/mysql
+    container_name: "nexvisions-torscraper-db"
+
+#   crawler:
+#     build: .
+#     restart: always
+# #    deploy:
+# #      resources:
+# #        limits:
+# #          cpus: '6'
+# #          memory: 14G
+# #        reservations:
+# #          cpus: '0.6'
+# #          memory: 4G
+#     ports:
+#       - "3128"
+#     volumes:
+#       - /work/storage1/enigma-volume/web-media/marketplace:/mnt
+#     depends_on:
+#       - db
+#       - elasticsearch
+#     container_name: "nexvisions-torscraper-crawler"
+
+  tor-privoxy0:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy0"
+  tor-privoxy1:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy1" 
+  tor-privoxy2:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy2"
+  tor-privoxy3:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy3"
+  tor-privoxy4:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy4"
+  tor-privoxy5:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy5"
+  tor-privoxy6:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy6"
+  tor-privoxy7:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy7"
+  tor-privoxy8:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy8"
+  tor-privoxy9:
+    restart: always
+    build: tor-privoxy-scraper
+    container_name: "nexvisions-torscraper-tor-privoxy9"   
+    
+  tor-privoxy-web:
+    restart: always
+    build: onion_proxy
+    ports:
+      # - "9050:9050" # Tor proxy
+      - "3100:8100" # Privoxy
+    container_name: "nexvisions-torscraper-tor-privoxy-web"
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.57.0/24
+

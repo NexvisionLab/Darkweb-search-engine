@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% from 'ruler.macro.html' import ruler %}
+{% block body %}
+
+{{ ruler() }}
+<p> These sections have been changed by us. To access the original ones, visit:<a href="https://github.com/dirtyfilthy/nexvisions-torscraper">https://github.com/dirtyfilthy/nexvisions-torscraper</a>.</p>
+<a style="display:none">faq.html</a>
+<div class="contents">
+
+<div class="FAQ">
+<div class="question">
+<h2>What do the colors of the onion links mean?</h2>
+</div>
+<div class="answer">
+<p>
+Green means the site is live. Orange means we've been having some trouble connecting to it recently, but it may still be online. Red means we haven't been able to connect to it for over four hours, and the link is likely to be dead.
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>How often are the links checked?</h2>
+</div>
+<div class="answer">
+<p>
+Sites that are online are checked every 1-3 hours. Sites that are dead are checked (60+rand(12:q0))*(1.5^dead_in_a_row) where "dead_in_a_row" is the number of times the site has been checked and found dead in a row. If a site ends up live again, the value is reset to zero.
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>Where new onion sites are taken from?</h2>
+</div>
+<div class="answer">
+<p>
+This site runs a tor web spider that is constantly crawling every link in the database 24/7. New links are added as they are discovered. We also scrape a number of clear net sites, such as:
+</p>
+<p>
+<ul>
+<li><a href="https://eqt5g4fuenphqinx.tor2web.org/antanistaticmap/stats/yesterday"</a>https://eqt5g4fuenphqinx.tor2web.org/antanistaticmap/stats/yesterday</a></li>
+<li><a href="https://onion.cab/list.php?a=list">https://onion.cab/list.php?a=list</a></li>
+<li><a href="https://www.reddit.com/r/onions/search?q=url%3A.onion&sort=new&restrict_sr=on">https://www.reddit.com/r/onions/search?q=url%3A.onion&amp;sort=new&amp;restrict_sr=on</a></li>
+<li><a href="https://ahmia.fi/address/">https://ahmia.fi/address/</a></li>
+<li><a href="https://www.deepdotweb.com/2013/10/28/updated-llist-of-hidden-marketplaces-tor-i2p">https://www.deepdotweb.com/2013/10/28/updated-llist-of-hidden-marketplaces-tor-i2p</a></li>
+<li><a href="https://darkwebnews.com/deep-web-links/">https://darkwebnews.com/deep-web-links/</a></li>
+<li><a href="https://raw.githubusercontent.com/alecmuffett/onion-sites-that-dont-suck/master/README.md">https://raw.githubusercontent.com/alecmuffett/onion-sites-that-dont-suck/master/README.md</a></li>
+<li><a href="https://en.wikipedia.org/wiki/List_of_Tor_hidden_services">https://en.wikipedia.org/wiki/List_of_Tor_hidden_services</a></li>
+<li><a href="https://www.reddit.com/r/HiddenService/">https://www.reddit.com/r/HiddenService/</a></li>
+<li><a href="https://pastebin.com/r5rDVPQr">https://pastebin.com/r5rDVPQr</a>(Added)</li>
+<li><a href="https://danwin1210.me/onions.php?format=text">https://danwin1210.me/onions.php?format=text</a>(Added)</li>
+<li><a href="https://www.nextleveltricks.com/deep-web-darknet-websites-links">https://www.nextleveltricks.com/deep-web-darknet-websites-links</a>(Added)</li>
+<li><a href="http://www.thehackerstore.net/2015/07/huge-list-of-darknet-deep-web-hidden.html">http://www.thehackerstore.net/2015/07/huge-list-of-darknet-deep-web-hidden.html</a>(Added)</li>
+<li><a href="https://thehiddenwiki.org">https://thehiddenwiki.org</a>(Added)</li>
+<li><a href="https://torhiddenwiki.com">https://torhiddenwiki.com</a>(Added)</li>
+<li><a href="https://www.deepwebsiteslinks.com/deep-web-markets-links/">https://www.deepwebsiteslinks.com/deep-web-markets-links/</a>(Added)</li>
+<li><a href="https://www.quora.com/What-are-some-cool-dark-web-websites?share=1">https://www.quora.com/What-are-some-cool-dark-web-websites?share=1</a>(Added)</li>
+<li><a href="http://deepweblinks.org">http://deepweblinks.org</a>(Added)</li>
+</ul>
+</p>
+<p>We also have a Pastebin crawler and scraper running 24/7 harvesting .onion links.</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>What do the [F] and [G] tags mean?</h2>
+</div>
+<div class="answer">
+<p>
+Sites listed in the <a href="https://www.reddit.com/r/DNMSuperlist/wiki/superlist">super list</a> of darknet markets are tagged as [G]enuine. Clones of these sites are tagged as [F]ake. Note that clone detection is quite primitive.
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>A search on the term “X” didn’t show up in the results, why? </h2>
+</div>
+<div class="answer">
+<p>
+  Content related to child pornography is banned from this search engine. Banned onion links are those containing banned words in the header of the webpage. We are currently working on banning onion links with banned words in the page content as well, without blocking too many false positive (a website with the sentence: ‘no child pornography’ would also be banned).
+</p>
+<p>
+  Otherwise, if there is no result, it’s because there is no content in our database related to what you are searching for.
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>Can I have access to the complete database? </h2>
+</div>
+<div class="answer">
+<p>
+  Access to the full database is available to law enforcement officials and legitimate researchers. A legitimate researcher is either an academic, an individual who has presented at an infosec security conference, or someone employed by an infosec company.
+</p>
+<p>
+Contact us at <a href="mailto://research@gosecure.ca">research@gosecure.ca</a> to request access.
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>You have found a bug, you have a feature request or you have a question? </h2>
+</div>
+<div class="answer">
+We will certainly try to help you if we can. You can contact us at: <a href="mailto://research@gosecure.ca">research@gosecure.ca</a>.
+</div>
+</div>
+
+</div>
+{% endblock %}
+

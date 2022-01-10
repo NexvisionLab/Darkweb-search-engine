@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% from 'ruler.macro.html' import ruler %}
+{% block body %}
+
+{{ ruler() }}
+<a style="display:none">email_list.html</a>
+<div class="contents">
+<h2>Email Address</h2>
+<p>Showing domains for address "{{email}}" <a href="{{url_for('email_list_json', addr=addr)}}">[JSON]</a></p>
+<p></p>
+{{ domain_table(domains)}}
+
+</div>
+{% endblock %}

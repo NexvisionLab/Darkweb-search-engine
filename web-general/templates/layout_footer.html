@@ -1,0 +1,112 @@
+<!--============================= FOOTER =============================-->
+<footer class="main-block dark-bg">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="copyright">
+                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                    <p><a href="https://www.nexvisionlab.com">NEXVISIONLAB.</a> All right reserved.</p>
+                    <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<!--//END FOOTER -->
+
+
+<!-- jQuery, Bootstrap JS. -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="/static/js/jquery-3.2.1.min.js"></script>
+<script src="/static/js/popper.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+
+<!-- MDBootstrap Datatables  -->
+<link href="/static/css/datatables.min.css" rel="stylesheet">
+<!-- MDBootstrap Datatables  -->
+<script type="text/javascript" src="/static/js/datatables.min.js"></script>
+
+<script type="text/javascript" src="/static/js/allinone.js"></script>
+
+<script>
+    $(window).scroll(function () {
+        // 100 = The point you would like to fade the nav in.
+
+        if ($(window).scrollTop() > 100) {
+
+            $('.fixed').addClass('is-sticky');
+
+        } else {
+
+            $('.fixed').removeClass('is-sticky');
+
+        }
+        ;
+    });
+    $(document).ready(function () {
+
+        $('#dt-material-checkbox').dataTable({
+            columnDefs: [{
+                orderable: false,
+                className: 'select-checkbox',
+                targets: 0
+            }],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            },
+            searching: false
+        });
+
+        var client = elasticsearch.Client({
+            host: 'darknyx.com:443'
+        });
+        var query = {
+            "bool": {
+                "must": [
+                    {
+                        "query_string": {
+                            "query": $('#input_search').val(),
+                            "fields": [
+                                "title",
+                                "title_raw",
+                                "url",
+                                "body_stripped",
+                                "body_stripped_raw"
+                            ]
+                        }
+                    },
+                    {
+                        "term": {
+                            "type": "darknet"
+                        }
+                    }
+                ]
+            }
+        };
+        var table = $('#searchlist').dataTable({
+            'columns': [
+                {'sTitle': 'Domain', 'sName': 'domain'},
+                {'sTitle': 'Title', 'sName': 'title'},
+                {'sTitle': 'Updated', 'sName': 'visited_at'},
+            ],
+            "pageLength": 25,
+            "ordering": false,
+            'bProcessing': true,
+            'bFilter': false,
+            'bServerSide': true,
+            'bAutoWidth': true,
+            'fnServerData': $.fn.dataTable.elastic_datatables({
+                index: 'hiddenservices',
+                client: client,
+                body: {
+                    "query": query,
+                    "_source": ["domain", "title", "visited_at"],
+                }
+            })
+        });
+    });
+</script>
+</body>
+
+</html>

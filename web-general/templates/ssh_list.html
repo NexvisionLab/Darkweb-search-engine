@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% from 'ruler.macro.html' import ruler %}
+{% block body %}
+
+{{ ruler() }}
+<a style="display:none">ssh_list.html</a>
+<div class="contents">
+<h2>SSH Fingerprint</h2>
+<p>Showing domains for fingerprint <a href="{{url_for('ssh_list_json', id=id)}}">[JSON]</a></p>
+<div class="fingerprint_container">
+<div class="fingerprint">
+{{fingerprint}}
+</div>
+</div>
+<p></p>
+{{ domain_table(domains)}}
+
+</div>
+{% endblock %}

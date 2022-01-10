@@ -1,0 +1,11 @@
+{% if not is_cached() %}
+{% include "layout_header.html" %}
+{% endif %}
+
+{% block body %}{% endblock %}
+
+{% if not is_cached() %}
+{% include "layout_footer.html" %}
+{% endif %}
+
+   

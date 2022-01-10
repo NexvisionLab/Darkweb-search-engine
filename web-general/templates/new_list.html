@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Colorlib">
+    <meta name="description" content="#">
+    <meta name="keywords" content="#">
+    <!-- Page Title -->
+    <title>Listing &amp; Directory Website Template</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,500,700,900" rel="stylesheet">
+    <!-- Simple line Icon -->
+    <link rel="stylesheet" href="/static/css/simple-line-icons.css">
+    <!-- Themify Icon -->
+    <link rel="stylesheet" href="/static/css/themify-icons.css">
+    <!-- Hover Effects -->
+    <link rel="stylesheet" href="/static/css/set1.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <!--============================= HEADER =============================-->
+    <div class="nav-menu">
+        <div class="bg transition">
+            <div class="container-fluid fixed">
+                <div class="row">
+                    <div class="col-md-10">
+                        <form class="form-wrap mt-4">
+                            <div class="btn-group" role="group" aria-label="Basic example">
+                                <a class="navbar-brand" href="/">
+                                    <img src="/static/images/apple-icon-76x76.png" alt="Start Bootstrap Logo">
+                                </a>
+                                <input style="margin-top:10px;margin-bottom:10px" type="text" placeholder="What are your looking for?" class="btn-group1">
+                                <button style="margin-top:10px;margin-bottom:10px" type="submit" class="btn-form"><span class="icon-magnifier search-icon"></span>SEARCH<i class="pe-7s-angle-right"></i></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SLIDER -->
+    <section class="slider d-flex align-items-left">
+        <!-- <img src="images/slider.jpg" class="img-fluid" alt="#"> -->
+        <div class="container" style="padding-top: 120px; max-width: 2000px">
+            <div class="row d-flex justify-content-center" style="width:100%;background-color:white">
+                <div class="col-md-12">
+                    <table id="dt-material-checkbox" class="table table-striped" cellspacing="0" width="100%">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th class="th-sm">Onion</th>
+                            <th class="th-sm">Title</th>
+                            <th class="th-sm">Added</th>
+                            <th class="th-sm">Visited At</th>
+                            <th class="th-sm">Last Up</th>
+                        </tr>
+                        </thead>
+                        <tbody> 
+                        <tr>
+                            <td></td>
+                            <td>Customer Support</td>
+                            <td>New York</td>
+                            <td>27</td>
+                            <td>2011/01/25</td>
+                            <td>$112,000</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--// SLIDER -->
+    <!--//END HEADER -->
+    
+    <!--============================= FOOTER =============================-->
+    <footer class="main-block dark-bg">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="copyright">
+                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                        <p>Copyright &copy; 2018 Listing. All rights reserved | This template is made with <i class="ti-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a></p>
+                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!--//END FOOTER -->
+
+
+
+
+    <!-- jQuery, Bootstrap JS. -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="/static/js/jquery-3.2.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+
+    <script>
+        $(window).scroll(function() {
+            // 100 = The point you would like to fade the nav in.
+
+            if ($(window).scrollTop() > 100) {
+
+                $('.fixed').addClass('is-sticky');
+
+            } else {
+
+                $('.fixed').removeClass('is-sticky');
+
+            };
+        });
+        $(document).ready(function() {     
+            $('#dt-material-checkbox').dataTable({
+                columnDefs: [{
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets: 0
+                    }],
+                select: {
+                    style: 'os',
+                    selector: 'td:first-child'
+                    }
+                });
+        });
+    </script>
+</body>
+
+</html>

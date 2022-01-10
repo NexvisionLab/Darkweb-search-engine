@@ -1,0 +1,26 @@
+version: '3.2'
+
+services:
+  create_certs:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION}
+    container_name: create_certs
+    command: >
+      bash -c '
+        yum install -y -q -e 0 unzip;
+        if [[ ! -f /certs/bundle.zip ]]; then
+          bin/elasticsearch-certutil cert --silent --pem --in config/certificates/elk-instances.yml -out /certs/bundle.zip;
+          unzip /certs/bundle.zip -d /certs;
+        fi;
+        chown -R 1000:0 /certs
+      '
+    working_dir: /usr/share/elasticsearch
+    volumes:
+      - ./elk-certs:/certs
+      - .:/usr/share/elasticsearch/config/certificates
+    
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.57.0/24

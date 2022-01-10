@@ -1,0 +1,28 @@
+{% import 'input.macro.html' as input %}
+{% macro search_panel(context, n_results, orig_count, is_more, elasticsearch_enabled) %}
+<div id="search">
+<form method="GET">
+<p> 
+<div id="search_options">
+{{input.checkbox("never_seen", context["never_seen"], "inc. never seen")}}
+{{input.checkbox("is_up", context["is_up"], "alive only")}}
+({{input.radio("rep", ["n/a","genuine", "fake"], context["rep"])}})
+{{input.checkbox("show_subdomains", context["show_subdomains"], "show subdomains")}} 
+{{input.checkbox("show_fh_default", context["show_fh_default"], "show fh default")}}
+{% if elasticsearch_enabled %}
+{{input.checkbox("search_title_only", context["search_title_only"], "search title only")}}
+{{input.checkbox("phrase", context["phrase"], "match phrase")}}
+{% endif %}
+</div>
+<div id="search_box">
+{{input.text("search", context["search"], "search:")}} {{input.submit("Go >>>")}} 
+</div>
+<div id="search_info">
+<span class="small">
+search for title, email, bitcoin addr or onion domain. <span class="tag genuine">[G]</span> means genuine, <span class="tag fake">[F]</span> means a fake clone site. domain status is <span class="good bold">alive</span>,  <span class="warning bold">problems</span> or <span class="dead_span bold">down</span>. showing {{n_results}} of {{orig_count}} results.
+<a href="{{url_for('index_json',search=context['search'], is_up=context['is_up'], show_subdomains=context['show_subdomains'], rep=context['rep'], never_seen=context['never_seen'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], page=context['page'], sort=context['sort'], phrase=context['phrase'])}}">[JSON]</a>
+</span>
+</div>
+</form>
+</div>
+{% endmacro %}

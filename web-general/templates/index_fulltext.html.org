@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_fulltext_table %}
+{% from 'domain_table.macro.html' import paginate %}
+{% from 'search_panel.macro.html' import search_panel %}
+
+{% block body %}
+<a style="display:none">index_fulltext.html</a>
+<div class="contents">
+
+<!--============================= HEADER =============================-->
+<div class="nav-menu">
+    <div class="bg transition">
+        <div class="container-fluid fixed" style="background-color: #252a33;">
+            <div class="row">
+                <div class="col-md-10">
+                    <form method="GET" class="form-wrap mt-4">
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <a class="navbar-brand" href="/">
+                                <img src="/static/images/logo.png" alt="NEXVISION" style="width:76px">
+                            </a>
+			    <input style="margin-top:10px;margin-bottom:10px" name="search" id="input_search" type="text" placeholder="What are your looking for?" class="btn-group1" value="{% print context['search'] %}">
+                            <button style="margin-top:10px;margin-bottom:10px" type="submit" class="btn-form"><span class="icon-magnifier search-icon"></span>SEARCH<i class="pe-7s-angle-right"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- SLIDER -->
+<section class="slider d-flex align-items-left">
+    <!-- <img src="images/slider.jpg" class="img-fluid" alt="#"> -->
+    <div class="container" style="padding-top: 120px; max-width: 2000px">
+        <div class="row d-flex justify-content-center" style="width:100%;background-color:white">
+            <div class="col-md-12">
+
+
+{% if orig_count + 1 == 0 %}
+
+<div id="error_code">
+No Results
+</div>
+
+{% else %}
+
+{{ domain_fulltext_table(domains, results, sortable=True, context=context) }}
+
+{{ paginate(context, orig_count, n_results, page) }}
+
+{% endif %}
+
+
+</div>
+</div>
+</div>
+</section>
+<!--// SLIDER -->
+<!--//END HEADER -->
+
+
+</div>
+{% endblock %}
+
