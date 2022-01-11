@@ -22,7 +22,7 @@
 ### Elasticsearch
 
 Elasticsearch cluster consists of 2 Elasticsearch instance for HA and load balancing.
-THe scrapped page data is stored and searched.
+The scrapped page data is stored and searched.
 
 ### Kibana
 
