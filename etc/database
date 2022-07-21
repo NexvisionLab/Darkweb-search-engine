@@ -1,4 +1,4 @@
-DB_HOST=
-DB_USER=
-DB_PASS=
-DB_BASE=
+DB_HOST=nexvisions-torscraper-db
+DB_USER=toruser
+DB_PASS=tor-password
+DB_BASE=tor
