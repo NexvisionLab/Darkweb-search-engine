@@ -8,7 +8,7 @@ services:
     environment:
      - cluster.name=docker-cluster
      - node.name=elasticsearch1
-     - "ES_JAVA_OPTS=-Xmx16g -Xms16g"
+     - "ES_JAVA_OPTS=-Xmx4g -Xms4g"
     #  - ELASTIC_PASSWORD=reZeP6crgHBGVsKeAFyWnduTzcwyB4qR
     #  - xpack.monitoring.collection.enabled=true
     #  - xpack.monitoring.exporters.remote.type=http
@@ -32,7 +32,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - /work/storage1/enigma-volume/elasticsearch1:/usr/share/elasticsearch/data
+      - .data/elasticsearch1:/usr/share/elasticsearch/data
       - ./elk-certs:$ELK_CERTS_DIR
     ports:
       - "127.0.0.1:9200:9200"
@@ -43,7 +43,7 @@ services:
     environment:
      - cluster.name=docker-cluster
      - node.name=elasticsearch2
-     - "ES_JAVA_OPTS=-Xmx16g -Xms16g"
+     - "ES_JAVA_OPTS=-Xmx4g -Xms4g"
     #  - ELASTIC_PASSWORD=reZeP6crgHBGVsKeAFyWnduTzcwyB4qR
     #  - xpack.monitoring.collection.enabled=true
     #  - xpack.monitoring.exporters.remote.type=http
@@ -67,7 +67,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - /work/storage2/enigma-volume/elasticsearch2:/usr/share/elasticsearch/data
+      - .data/elasticsearch2:/usr/share/elasticsearch/data
       - ./elk-certs:$ELK_CERTS_DIR
     # ports:
     #   - "127.0.0.1:9201:9200"
@@ -114,11 +114,10 @@ services:
 
   db:
     build: db
-    # uncomment if you want database to persist
     ports:
       - "127.0.0.1:3307:3306"
     volumes:
-      - /work/storage0/enigma-volume/mysqldb:/var/lib/mysql
+      - .data/mysqldb:/var/lib/mysql
     container_name: "nexvisions-torscraper-db"
 
 #   crawler:
@@ -134,8 +133,6 @@ services:
 # #          memory: 4G
 #     ports:
 #       - "3128"
-#     volumes:
-#       - /work/storage1/enigma-volume/web-media/marketplace:/mnt
 #     depends_on:
 #       - db
 #       - elasticsearch

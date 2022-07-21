@@ -1,10 +1,5 @@
 FROM dockage/alpine:3.9-openrc
 
-MAINTAINER Olivier Bilodeau <obilodeau@gosecure.ca>
-# Modified from a Dockerfile by Dockage <me@mortezana.com>
-# Under the MIT license
-# https://github.com/dockage/nexvisions-torscraper-tor-privoxy
-
 RUN apk --no-cache --update add tor privoxy \
     && mv /etc/tor/torrc.sample /etc/tor/torrc \
     && echo "forward-socks5 / 0.0.0.0:9050 ." >> /etc/privoxy/config \

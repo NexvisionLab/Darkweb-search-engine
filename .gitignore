@@ -3,7 +3,6 @@
 /init/data/
 /var/
 /venv/
-etc/private
 
 # Visual Studio Code
 .vscode/*
@@ -11,3 +10,6 @@ etc/private
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# volume data
+.data

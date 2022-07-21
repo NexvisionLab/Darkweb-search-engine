@@ -7,7 +7,7 @@ WORKDIR /work
 
 # os setup
 RUN apt-get update && apt-get -y install \
-  python-lxml \
+  python3-lxml \
   build-essential \
   libssl-dev \
   libffi-dev \

@@ -43,8 +43,6 @@ try:
         # 'es': spacy.load('es_core_news_md'),
     }
 except Exception as ex: 
-    traceback.print_exc()
-    print(ex)
     print("Cannot import language library.")
     pass
 
@@ -319,7 +317,6 @@ class PageDocType(Document):
         if langCode in spacyNLP and bodyCleaned.strip() != '':
             doc = spacyNLP[langCode](bodyCleaned.strip())
             for entity in doc.ents:
-                print("New Entity:", entity.label_, ":", entity.text, ":", flush=True)
                 entityDoc = EntityDocType.from_obj({
                     'text': entity.text,
                     'label': entity.label_,
@@ -432,31 +429,31 @@ if is_elasticsearch_enabled():
 
 
 def migrate():
-    # # hidden service
-    # hidden_services = Index('hiddenservices')
-    # hidden_services.delete(ignore=404)
-    # hidden_services = Index('hiddenservices')
-    # hidden_services.settings(
-    #     number_of_shards=320,
-    #     number_of_replicas=1,
-    #     # max_shingle_diff=20,
-    #     max_result_window=1000000000,
-    # )
-    # hidden_services.document(DomainDocType)
-    # hidden_services.document(PageDocType)
-    # hidden_services.create()
+    # hidden service
+    hidden_services = Index('hiddenservices')
+    hidden_services.delete(ignore=404)
+    hidden_services = Index('hiddenservices')
+    hidden_services.settings(
+        number_of_shards=320,
+        number_of_replicas=1,
+        # max_shingle_diff=20,
+        max_result_window=1000000000,
+    )
+    hidden_services.document(DomainDocType)
+    hidden_services.document(PageDocType)
+    hidden_services.create()
 
-    # # email store
-    # email_store = Index('emailstore')
-    # email_store.delete(ignore=404)
-    # email_store = Index('emailstore')
-    # email_store.settings(
-    #     number_of_shards=4,
-    #     number_of_replicas=1,
-    #     max_result_window=1000000000,
-    # )
-    # email_store.document(EmailDocType)
-    # email_store.create()
+    # email store
+    email_store = Index('emailstore')
+    email_store.delete(ignore=404)
+    email_store = Index('emailstore')
+    email_store.settings(
+        number_of_shards=4,
+        number_of_replicas=1,
+        max_result_window=1000000000,
+    )
+    email_store.document(EmailDocType)
+    email_store.create()
 
     # entity store
     entity_store = Index('entitystore')

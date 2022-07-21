@@ -1,16 +1,8 @@
 FROM python:3.8
-MAINTAINER Olivier Bilodeau <obilodeau@gosecure.ca>
-# Modified from a Dockerfile by Madison Bahmer <madison.bahmer@istresearch.com>
-# Under the MIT license
-# https://github.com/istresearch/scrapy-cluster/blob/master/docker/crawler/Dockerfile
-
-# RUN apk update
-# RUN apk add --update --no-cache curl py-pip
-# RUN apk add python3 python3-dev libffi-dev gcc make musl-dev py-pip mysql-client openssl-dev libxml2-dev libxslt1-dev
 
 # os setup
 RUN apt-get update && apt-get -y install \
-  python-lxml \
+  python3-lxml \
   build-essential \
   libssl-dev \
   libffi-dev \
