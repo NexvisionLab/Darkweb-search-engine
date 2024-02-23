@@ -60,13 +60,13 @@ Build and run the scraper.
 
 Run the scraper.
 
-    docker run -d --name nexvisions-torscraper-onion-crawler --network=darkweb-search-engine_default scraper_crawler /opt/torscraper/scripts/start_onion_scrapy.sh
+    docker run -d --name darkweb-search-engine-onion-crawler --network=darkweb-search-engine_default scraper_crawler /opt/torscraper/scripts/start_onion_scrapy.sh
 
 After first deployment, need to initialize the indexes on Elasticsearch.
 
-    docker exec nexvisions-torscraper-onion-crawler /opt/torscraper/scripts/elasticsearch_migrate.sh
+    docker exec darkweb-search-engine-onion-crawler /opt/torscraper/scripts/elasticsearch_migrate.sh
 
 Import initial domain list
 
-    docker exec nexvisions-torscraper-onion-crawler /opt/torscraper/scripts/push_list.sh /opt/torscraper/onions_list/onions.txt &
+    docker exec darkweb-search-engine-onion-crawler /opt/torscraper/scripts/push_list.sh /opt/torscraper/onions_list/onions.txt &
 

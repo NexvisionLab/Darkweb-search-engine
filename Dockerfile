@@ -1,17 +1,36 @@
-FROM python:3.8
+FROM ubuntu:20.04
 
 # os setup
+ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -y install \
   lynx \
+  python3-pip \
+  python3-dev \
   python3-lxml \
   build-essential \
   libssl-dev \
   libffi-dev \
-  python-dev \
   libxml2-dev \
   libxslt1-dev \
   haproxy \
+  wget \
+  unzip \
   && rm -rf /var/lib/apt/lists/*
+
+# install exif tool
+RUN mkdir /tmp/exiftool-build && \
+  cd /tmp/exiftool-build && \
+  wget https://github.com/exiftool/exiftool/archive/refs/tags/12.58.zip && \
+  unzip 12.58.zip && \
+  cd exiftool-12.58/ && \
+  perl Makefile.PL && \
+  make test && \
+  make install && \
+  cd /tmp/ && \
+  rm -rf /tmp/exiftool-build
+
+RUN ln -s /usr/bin/python3.8 /usr/bin/python
+
 RUN mkdir -p /opt/torscraper/
 WORKDIR /opt/torscraper
 
@@ -21,14 +40,14 @@ RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --upgrade requests
 
-# download spacy models
+# # download spacy models
 # RUN python -m spacy download ca_core_news_md
 # RUN python -m spacy download zh_core_web_md
 # RUN python -m spacy download da_core_news_md
 # RUN python -m spacy download nl_core_news_md
 RUN python -m spacy download en_core_web_lg
 # RUN python -m spacy download fr_core_news_md
-RUN python -m spacy download de_core_news_md
+# RUN python -m spacy download de_core_news_md
 # RUN python -m spacy download el_core_news_md
 # RUN python -m spacy download it_core_news_md
 # RUN python -m spacy download ja_core_news_md
@@ -38,8 +57,15 @@ RUN python -m spacy download de_core_news_md
 # RUN python -m spacy download pl_core_news_md
 # RUN python -m spacy download pt_core_news_md
 # RUN python -m spacy download ro_core_news_md
-RUN python -m spacy download ru_core_news_md
+# RUN python -m spacy download ru_core_news_md
 # RUN python -m spacy download es_core_news_md
+
+# download nltk models
+RUN python -m nltk.downloader 'punkt'
+
+# # install playwright
+# RUN playwright install-deps
+# RUN playwright install
 
 # move codebase over
 COPY . /opt/torscraper
