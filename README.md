@@ -70,3 +70,15 @@ Import initial domain list
 
     docker exec darkweb-search-engine-onion-crawler /opt/torscraper/scripts/push_list.sh /opt/torscraper/onions_list/onions.txt &
 
+The following system configuration (/etc/sysctl.conf) is recommended:
+
+    # Force gc to clean-up quickly 
+    net.ipv4.neigh.default.gc_interval = 3600 
+    # Set ARP cache entry timeout
+    net.ipv4.neigh.default.gc_stale_time = 3600    
+    # Setup DNS threshold for arp 
+    net.ipv4.neigh.default.gc_thresh3 = 4096
+    net.ipv4.neigh.default.gc_thresh2 = 2048
+    net.ipv4.neigh.default.gc_thresh1 = 1024
+    # Max Map Count
+    vm.max_map_count=262144
