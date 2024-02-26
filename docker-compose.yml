@@ -36,7 +36,7 @@ services:
       - ./elk-certs:$ELK_CERTS_DIR
     ports:
       - "127.0.0.1:9200:9200"
-    container_name: "nexvisions-torscraper-elasticsearch1"
+    container_name: "darkweb-search-engine-elasticsearch1"
 
   elasticsearch2:
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION}
@@ -71,7 +71,7 @@ services:
       - ./elk-certs:$ELK_CERTS_DIR
     # ports:
     #   - "127.0.0.1:9201:9200"
-    container_name: "nexvisions-torscraper-elasticsearch2"
+    container_name: "darkweb-search-engine-elasticsearch2"
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${ELK_VERSION}
@@ -94,7 +94,7 @@ services:
     ports:
       - "127.0.0.1:5601:5601"
     restart: always
-    container_name: "nexvisions-torscraper-kibana"
+    container_name: "darkweb-search-engine-kibana"
 
   web-general:
     build: web-general
@@ -110,7 +110,7 @@ services:
       - db
       - elasticsearch1
       - elasticsearch2
-    container_name: "nexvisions-torscraper-web-general"
+    container_name: "darkweb-search-engine-web-general"
 
   db:
     build: db
@@ -118,7 +118,7 @@ services:
       - "127.0.0.1:3307:3306"
     volumes:
       - .data/mysqldb:/var/lib/mysql
-    container_name: "nexvisions-torscraper-db"
+    container_name: "darkweb-search-engine-db"
 
 #   crawler:
 #     build: .
@@ -136,48 +136,48 @@ services:
 #     depends_on:
 #       - db
 #       - elasticsearch
-#     container_name: "nexvisions-torscraper-crawler"
+#     container_name: "darkweb-search-engine-crawler"
 
   tor-privoxy0:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy0"
+    container_name: "darkweb-search-engine-tor-privoxy0"
   tor-privoxy1:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy1" 
+    container_name: "darkweb-search-engine-tor-privoxy1" 
   tor-privoxy2:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy2"
+    container_name: "darkweb-search-engine-tor-privoxy2"
   tor-privoxy3:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy3"
+    container_name: "darkweb-search-engine-tor-privoxy3"
   tor-privoxy4:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy4"
+    container_name: "darkweb-search-engine-tor-privoxy4"
   tor-privoxy5:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy5"
+    container_name: "darkweb-search-engine-tor-privoxy5"
   tor-privoxy6:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy6"
+    container_name: "darkweb-search-engine-tor-privoxy6"
   tor-privoxy7:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy7"
+    container_name: "darkweb-search-engine-tor-privoxy7"
   tor-privoxy8:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy8"
+    container_name: "darkweb-search-engine-tor-privoxy8"
   tor-privoxy9:
     restart: always
     build: tor-privoxy-scraper
-    container_name: "nexvisions-torscraper-tor-privoxy9"   
+    container_name: "darkweb-search-engine-tor-privoxy9"   
     
   tor-privoxy-web:
     restart: always
@@ -185,7 +185,7 @@ services:
     ports:
       # - "9050:9050" # Tor proxy
       - "3100:8100" # Privoxy
-    container_name: "nexvisions-torscraper-tor-privoxy-web"
+    container_name: "darkweb-search-engine-tor-privoxy-web"
 
 networks:
   default:
