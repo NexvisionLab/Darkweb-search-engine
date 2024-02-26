@@ -1,4 +1,4 @@
-DB_HOST=nexvisions-torscraper-db
+DB_HOST=darkweb-search-engine-db
 DB_USER=toruser
 DB_PASS=tor-password
 DB_BASE=tor
