@@ -49,10 +49,14 @@ Based on Python Scrapy framework.
 
 ## Installation
 
-Clone the project and build docker images involved in docker-compose.
+Clone the project and change the ```yourdomain:yourport``` of the web-general to your ```host:port``` in ```web-general\templates\layout_footer.html```.
 
-    docker-compose build
-    docker-compose up -d
+Update the list of onion addresses you want to set as the crawler seed in ```onions_list\onions.txt```. Current addresses are taken from [Ahmia's list](https://ahmia.fi/onions/)
+
+Build docker images involved in docker-compose.
+
+    docker compose build
+    docker compose up -d
 
 Build and run the scraper.
 

@@ -32,7 +32,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - .data/elasticsearch1:/usr/share/elasticsearch/data
+      - .data/elasticsearch1:/var/lib/elasticsearch/data
       - ./elk-certs:$ELK_CERTS_DIR
     ports:
       - "127.0.0.1:9200:9200"
@@ -67,7 +67,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - .data/elasticsearch2:/usr/share/elasticsearch/data
+      - .data/elasticsearch2:/var/lib/elasticsearch/data
       - ./elk-certs:$ELK_CERTS_DIR
     # ports:
     #   - "127.0.0.1:9201:9200"

@@ -29,7 +29,7 @@ try:
         # 'nl': spacy.load('nl_core_news_md'),
         'en': spacy.load('en_core_web_lg'),
         # 'fr': spacy.load('fr_core_news_md'),
-        'de': spacy.load('de_core_news_md'),
+        # 'de': spacy.load('de_core_news_md'),
         # 'el': spacy.load('el_core_news_md'),
         # 'it': spacy.load('it_core_news_md'),
         # 'ja': spacy.load('ja_core_news_md'),
@@ -39,7 +39,7 @@ try:
         # 'pl': spacy.load('pl_core_news_md'),
         # 'pt': spacy.load('pt_core_news_md'),
         # 'ro': spacy.load('ro_core_news_md'),
-        'ru': spacy.load('ru_core_news_md'),
+        # 'ru': spacy.load('ru_core_news_md'),
         # 'es': spacy.load('es_core_news_md'),
     }
 except Exception as ex: 
