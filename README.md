@@ -51,8 +51,8 @@ Based on Python Scrapy framework.
 
 Clone the project and build docker images involved in docker-compose.
 
-    docker-compose build
-    docker-compose up -d
+    docker compose build
+    docker compose up -d
 
 Build and run the scraper.
 
