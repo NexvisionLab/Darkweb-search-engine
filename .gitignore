@@ -13,3 +13,61 @@
 
 # volume data
 .data
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+.tox/
+.nox/
+*.log
+
+# Claude settings
+.claude/*
+
+# Poetry
+dist/
+*.egg-info/
+
+# Build artifacts
+build/
+*.so
+*.dylib
+*.dll
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Virtual environments
+env/
+.env
+.venv
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Temporary files
+*.tmp
+tmp/
+temp/
