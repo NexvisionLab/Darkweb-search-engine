@@ -25,9 +25,8 @@ built as an add-on gateway that this codebase never needs and never imports.
   RansomLook, per-group "known mirrors" info (live up/down status, safety-
   reviewed mirror screenshots), and per-victim detail.
 - **Marketplace price trend tracking.**
-- **Free OSINT safety tools** — breach/credential exposure check, image
-  metadata scrubber, URL/site safety checker, phishing email analyzer, scam
-  message classifier, QR code checker, Tor Browser configuration checker.
+- **Free OSINT safety tools** — see [below](#free-osint-safety-tools) for what
+  each one actually does.
 - **Watchlist alerts** — a webhook fires the moment a keyword or regex is
   matched on a new ransomware victim, plus an immediate retro-hunt against
   the existing corpus.
@@ -61,6 +60,88 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full component
 breakdown, [docs/API.md](docs/API.md) for the API reference, and
 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for a from-scratch production
 deployment guide (systemd units, nginx, TLS via DNS-01).
+
+### How the engine actually works
+
+A page goes through six stages between being discovered and showing up in a
+search result:
+
+1. **Discovery.** A crawled page's outbound links become discovery
+   candidates. `DiscoveryPipeline` records each one against its source host
+   and drops it immediately — a discovered-but-not-yet-crawled link has no
+   meaning to any of the downstream stages, so it never reaches them.
+2. **Crawl.** Scrapy fetches the page through the `tor-privoxy-0` container —
+   the crawler never touches the open internet directly for `.onion` fetches.
+3. **Enrichment.** Each crawled page runs through `classification.py` (14
+   content categories), `pii.py` (flags personal data without exposing it),
+   `entity_extract.py` (Bitcoin/Ethereum/Monero addresses, IPs, CVEs, API
+   keys, IBANs, PGP keys, and 15 other structured types), `email_extract.py`,
+   `price_extract.py` (marketplace listings), and `clone_detect.py` (checks
+   near-duplicate pages against known-legitimate mirrors — how the platform
+   tells a real onion service apart from a phishing clone of one).
+4. **Safety rating.** `safety_rating.py` rolls a domain's crawled pages up
+   into one Verified / Unrated / Suspicious / Dangerous rating. Most
+   categories are ranked by severity (extremism-violence and leak-dump sit
+   above the rest), but two signals override that ranking outright regardless
+   of category: a page linking to malware, or a near-duplicate of a
+   known-legitimate page from a different domain (both mean the domain is
+   dangerous no matter what else is on it). **CSAM is checked before every
+   other signal, including those overrides** — a single CSAM-classified page
+   makes the whole domain CSAM-confirmed unconditionally. A CSAM-confirmed
+   domain isn't just rated Dangerous like everything else here; `api/labels.py`
+   drops it from search results, entity search, and domain lookups entirely.
+   The URL checker tool (below) won't even live-fetch or explain why it's
+   refusing to check such a host — a flat refusal, never a hint.
+5. **Storage.** Structured data (domains, pages, entities, prices) goes to
+   Postgres. The same page content is embedded with `all-MiniLM-L6-v2`
+   (384 dimensions — the same model `classification.py` already loads for
+   content classification, reused rather than loading a second model) and
+   indexed into OpenSearch alongside the raw text, so one query serves both
+   full-text and semantic (k-NN vector) search.
+6. **Serving.** The `api/` FastAPI app is entirely read-only against that
+   index and Postgres — it has no crawling code and no write path back into
+   the pipeline, so it's safe to deploy and scale independently of the
+   crawler.
+
+### Free OSINT safety tools
+
+Seven tools, all under `/tools/*`, all free, all usable without running your
+own crawl — each is a thin API wrapper (or, for the Tor checker, pure
+client-side JavaScript) around the same engines the platform already runs
+internally.
+
+- **Breach & credential exposure checker** — checks whether an email appears
+  in PII the crawler has already flagged on real leak-dump pages. The email
+  is hashed before checking and **never stored or logged**; a match tells
+  you it exists and how many times it's been seen, never which domain or
+  page it came from.
+- **Image metadata scrubber** — strips EXIF and other embedded metadata from
+  an uploaded image and returns a clean copy, re-encoded rather than merely
+  stripped-in-place. The protective mirror of the same forensic work this
+  platform does to *find* that kind of metadata in crawled images.
+- **URL/site safety checker** — checks the platform's own crawled index
+  first, so checking a known host never requires connecting to it live; only
+  falls back to a live fetch for a host that hasn't been crawled yet. Also
+  backs the fake-shop checker on the frontend — same engine, different
+  framing.
+- **Phishing email analyzer** — runs pasted email content through the same
+  scam-classification model as the message checker below, and separately
+  checks up to 3 embedded links against the URL checker. Doesn't verify
+  SPF/DKIM/DMARC yet — that needs a live DNS lookup against the sender's
+  domain, a distinct capability not yet built.
+- **Scam message classifier** — one shared model behind both a general
+  scam-message checker and a job/investment-scam checker; most scam-pattern
+  detection is the same problem regardless of which framing a user picks.
+- **QR code checker** — decodes an uploaded QR code and safety-checks
+  whatever URL it points to through the same engine as the URL checker,
+  before you ever open it. Built specifically against "quishing" (malicious
+  QR codes) — a destination you can't eyeball before scanning.
+- **Tor Browser configuration checker** — runs entirely client-side in your
+  browser, no server round-trip, so nothing about your setup is ever sent
+  anywhere. Checks real anti-fingerprinting hygiene: whether any plugins are
+  reporting, whether more than one language is exposed, and whether your
+  reported hardware concurrency is high enough to help fingerprint you. Not
+  exhaustive — a quick read on your current setup, not a full audit.
 
 ## Quickstart (local development)
 
