@@ -1,5 +1,5 @@
 import os
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 import scrapy
 
@@ -90,7 +90,10 @@ class OnionSpider(scrapy.Spider):
             favicon_url = page_metadata.extract_favicon_url(response)
         except (scrapy.exceptions.NotSupported, ValueError) as e:
             self.log(f"Non-HTML resource at {response.url} ({e}) - recording, not parsing")
-            title = response.url.rsplit("/", 1)[-1] or response.url
+            # The URL path segment is percent-encoded whenever the original
+            # filename has non-ASCII characters - unquote it back to real
+            # text rather than showing raw %XX escapes as the title.
+            title = unquote(response.url.rsplit("/", 1)[-1] or response.url)
             body_text = None
             is_html = False
 
