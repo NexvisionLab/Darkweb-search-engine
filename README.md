@@ -78,7 +78,7 @@ cd api && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
 # in a second terminal
 cd crawler && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/scrapy crawl onion -a seeds_file=seeds.txt -s DEPTH_LIMIT=1
+.venv/bin/scrapy crawl onion -a seeds_file=../onions_list/onions.txt -s DEPTH_LIMIT=1
 
 # in a third terminal, serve web/ with any static file server
 python3 -m http.server 8080 --directory web
@@ -99,6 +99,7 @@ has synced Postgres into the search index.
 | `tor-proxy/` | Docker image for the Tor + Privoxy HTTP-proxy bridge the crawler routes through. |
 | `ops/` | systemd units, nginx config, and TLS/networking fixes for a real production deployment. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). |
 | `docker-compose.yml` | Postgres, OpenSearch, Valkey, and the Tor proxy — the four backing services. |
+| `onions_list/onions.txt` | A large (~19,000-address) unverified `.onion` URL list to bootstrap a first crawl. See [onions_list/README.md](onions_list/README.md) — real, but not liveness-checked; the crawl pipeline sorts out what's actually reachable. |
 
 ## Configuration
 

@@ -158,6 +158,14 @@ scrapy crawl onion -a seeds_file=seeds_runtime.txt -s DEPTH_LIMIT=1
 python3 scripts/reindex_opensearch.py
 ```
 
+For a much larger first crawl, use `onions_list/onions.txt` (~19,000
+unverified addresses — see [onions_list/README.md](../onions_list/README.md))
+instead of or alongside the RansomLook-sourced seeds:
+
+```bash
+scrapy crawl onion -a seeds_file=../onions_list/onions.txt -s DEPTH_LIMIT=1
+```
+
 After this, `darkweb-pipeline.timer` keeps the corpus fresh automatically —
 see `ops/scheduled-crawl/darkweb-pipeline.sh` for the exact step sequence it
 runs (seed refresh, crawl, price/entity/breach-email backfills, liveness
