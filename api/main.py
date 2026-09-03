@@ -68,6 +68,8 @@ VALID_ENTITY_TYPES = {
     "certificate", "private_key", "bin", "price", "telegram_handle", "vendor_handle", "card_type",
     "bitcoin_private_key", "crypto_wallet_seed_phrase", "pgp_key", "sql_injection", "onion_link",
     "social_handle", "company_identifier", "encoded_blob",
+    "file_hash", "crypto_tx_hash", "altcoin_address", "swift_bic", "postcode_us", "postcode_uk",
+    "gps_coordinates", "mac_address", "domain_mention", "discord_id", "whatsapp_link", "ransom_amount",
 }
 
 
