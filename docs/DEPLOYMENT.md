@@ -58,7 +58,7 @@ cd /opt/darknyx/crawler && python3 -m venv .venv && .venv/bin/pip install -r req
 
 ## 5. The local AI summarizer (optional but recommended)
 
-Free-tier on-demand page summarization runs a local llama.cpp server. Download
+Community on-demand page summarization runs a local llama.cpp server. Download
 a GGUF build of Qwen3.5-4B (or any instruction-tuned model llama.cpp
 supports — adjust `--chat_format` in the systemd unit accordingly) into
 `/opt/darknyx/ai/models/`, then:

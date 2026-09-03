@@ -1,11 +1,11 @@
-# DarkNyx (Free)
+# DarkNyx Community
 
 DarkNyx is a free, open-source dark-web search engine and threat-intelligence
 platform: a Tor-crawling search core, a public read-only API, a set of free
 OSINT/safety tools, and a single-page web frontend — all runnable on your own
 infrastructure.
 
-This is the **Free-tier** codebase. It is a genuine, complete, self-hostable
+This is the **Community** codebase. It is a genuine, complete, self-hostable
 product on its own — not a crippled demo. A separate, closed-source Pro tier
 (bulk AI summarization, an investigation copilot, risk-score narratives) is
 built as an add-on gateway that this codebase never needs and never imports.

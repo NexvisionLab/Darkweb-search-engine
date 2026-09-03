@@ -92,7 +92,7 @@ running the model is a deployment step, documented in
 
 ## What's deliberately not in this repo
 
-This is the Free-tier codebase. A separate, closed-source Pro tier exists as
+This is the Community codebase. A separate, closed-source Pro tier exists as
 an add-on inference gateway (bulk AI page summarization, an investigation
 copilot, AI-narrated risk scores) that authenticates its own API keys and
 talks to its own model provider. Nothing in this repository imports it, calls
