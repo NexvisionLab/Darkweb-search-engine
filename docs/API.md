@@ -33,7 +33,7 @@ Search by a structured entity type extracted from crawled pages.
 
 | Param | Required | Notes |
 |---|---|---|
-| `type` | yes | One of `VALID_ENTITY_TYPES` (see `api/main.py`) — 25 types including `btc`, `eth`, `xmr`, `ip`, `email`, `cve`, `api_key`, `iban`, `pgp_key`, `onion_link`, `bitcoin_private_key`, `crypto_wallet_seed_phrase`. |
+| `type` | yes | One of `VALID_ENTITY_TYPES` (see `api/main.py`) — 37 types including `btc`, `eth`, `xmr`, `ip`, `email`, `cve`, `api_key`, `iban`, `pgp_key`, `onion_link`, `bitcoin_private_key`, `crypto_wallet_seed_phrase`, `file_hash`, `crypto_tx_hash`, `altcoin_address`, `swift_bic`, `postcode_us`, `postcode_uk`, `gps_coordinates`, `mac_address`, `domain_mention`, `discord_id`, `whatsapp_link`, `ransom_amount`. |
 | `value` | yes | 3–254 chars. For `type=email`, this is checked against a hashed breach corpus only (see below) — the raw value is never looked up directly. |
 | `limit` / `offset` | no | Same as `/search`. |
 

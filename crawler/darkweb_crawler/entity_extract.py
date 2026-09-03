@@ -76,7 +76,77 @@ lookup. encoded_blob flags that a page contained a base64/hex-shaped
 run at all (fingerprinted, not the blob itself) even when it never
 decoded to readable text - AIL tags Base64/Hex/Binary as their own
 infoleak types for exactly this reason: a hidden blob is itself a
-signal worth surfacing before anyone knows what's inside it."""
+signal worth surfacing before anyone knows what's inside it.
+
+Twelve more types added 2026-09-03 from the extraction-roadmap pass,
+same regex-only discipline as everything above - no NER, no model,
+each one either has a genuinely distinctive format or requires an
+explicit label the way bin/vendor_handle already do:
+
+file_hash matches a bare 32/40/64-hex-char run (MD5/SHA1/SHA256 length)
+with no label needed - the exact length is distinctive enough on its
+own, the same reasoning crypto addresses already rely on. It can
+legitimately overlap with encoded_blob on the same string (a hash is
+also technically hex-encoded data) - that's fine, they answer different
+questions ("there's an encoded blob here" vs "this specific hex run is
+hash-shaped"). crypto_tx_hash by contrast REQUIRES a tx:/txid:/
+transaction: label: a bare 64-hex-char string is indistinguishable from
+a SHA256 hash by format alone, so without a label it would either
+double-count every SHA256 as a transaction or vice versa - the same
+"require a label to break shape ambiguity" reasoning as bin/
+vendor_handle.
+
+altcoin_address covers Litecoin (L/M prefix) and Tron (T prefix) -
+both have a fixed leading character like BTC/XMR already do. Solana is
+deliberately NOT included: Solana addresses have no fixed prefix
+character at all, just a bare base58 string of variable length, which
+would be a materially higher false-positive rate than anything else in
+this module - the "easy regex win" only applies where the format is
+genuinely distinctive, not to every ecosystem's address shape.
+
+swift_bic checks against a broad (not exhaustive) real ISO-3166
+country-code list in the code's country-code position, the same
+"more precise than pure shape-matching" reasoning IBAN's MOD-97 check
+already applies - a full 195-entry table wasn't worth the size for a
+detection feature at this precision level, but a bare `[A-Z]{2}` would
+have matched almost anything.
+
+postcode_us requires a US state abbreviation immediately before the
+digits (`CA 90210`, not a bare `90210`) - a 5-digit number alone is
+far too ambiguous to extract as PII on its own. postcode_uk needs no
+such anchor - the UK postcode format (letter(s)+digit(s), space,
+digit+letter+letter) is distinctive enough by itself. A generic
+"any country's postcode" type was considered and dropped: there's no
+shape general enough to be both real and low-noise across every
+country's format at once.
+
+gps_coordinates requires at least 3 decimal places on both numbers and
+a comma between them - ordinary price/quantity number pairs essentially
+never look like this. mac_address requires the same separator
+(colon or hyphen) used consistently across all six pairs, not mixed.
+
+domain_mention is restricted to a fixed allowlist of common TLDs and
+excludes anything already caught by onion_link or immediately preceded
+by "@" (an email's own domain, already handled separately and hashed)
+- an unrestricted "any word.tld" pattern would be far too noisy.
+
+discord_id requires an explicit "discord:" label (a bare 17-19 digit
+number is meaningless as a self-describing shape - could be a
+timestamp, a phone sequence, anything). whatsapp_link needs no label -
+`wa.me/<number>` is already distinctive.
+
+ransom_amount reuses the existing price pattern but only tags a match
+as ransom_amount (instead of the generic price type) when it appears
+within 100 characters of a ransom-note-style keyword ("ransom",
+"decrypt", "pay within", "deadline") - the same kind of keyword-
+proximity heuristic card_type already uses, extended to disambiguate a
+demand from an ordinary marketplace listing price.
+
+National ID / passport / SSN numbers were considered for this batch
+and deliberately left out - they're as format-detectable as anything
+here, but storing even a fingerprint of a government ID number is a
+retention-policy decision, not just an engineering one, and shouldn't
+be decided implicitly by being bundled into a routine batch."""
 import base64
 import binascii
 import hashlib
@@ -149,6 +219,48 @@ _COMPANY_RE = re.compile(
     r"\b(?:[A-Z][a-zA-Z&,.'-]{1,30}\s){1,4}(?:Inc\.?|LLC|Ltd\.?|GmbH|Corp\.?|PLC|S\.A\.|B\.V\.)\b"
 )
 
+_FILE_HASH_RE = re.compile(r"\b[0-9a-fA-F]{32}\b|\b[0-9a-fA-F]{40}\b|\b[0-9a-fA-F]{64}\b")
+_CRYPTO_TX_HASH_RE = re.compile(
+    r"\b(?:tx|txid|transaction)[:\s]{1,3}(0x[0-9a-fA-F]{64}|[0-9a-fA-F]{64})\b", re.IGNORECASE
+)
+_LITECOIN_RE = re.compile(r"\b[LM][a-km-zA-HJ-NP-Z1-9]{25,34}\b")
+_TRON_RE = re.compile(r"\bT[1-9A-HJ-NP-Za-km-z]{33}\b")
+
+# Broad, not exhaustive - real ISO-3166 alpha-2 codes covering the SWIFT
+# network's main geography. Precise enough to reject almost any random
+# 8/11-char alnum string, not meant as a complete country registry.
+_SWIFT_COUNTRY_CODES = {
+    "US", "GB", "DE", "FR", "IT", "ES", "NL", "BE", "CH", "AT", "SE", "NO", "DK", "FI",
+    "IE", "PT", "GR", "PL", "CZ", "HU", "RO", "BG", "HR", "SK", "SI", "LT", "LV", "EE",
+    "LU", "MT", "CY", "IS", "CA", "MX", "BR", "AR", "CL", "CO", "PE", "CN", "JP", "KR",
+    "IN", "SG", "HK", "TW", "TH", "VN", "PH", "ID", "MY", "AU", "NZ", "AE", "SA", "IL",
+    "TR", "EG", "ZA", "NG", "KE", "RU", "UA", "PK", "BD", "LK",
+}
+_SWIFT_BIC_RE = re.compile(r"\b([A-Z]{4})([A-Z]{2})([A-Z0-9]{2})([A-Z0-9]{3})?\b")
+
+_US_STATE_ABBRS = (
+    "AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|"
+    "NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC"
+)
+_POSTCODE_US_RE = re.compile(r"\b(?:" + _US_STATE_ABBRS + r")\s+(\d{5}(?:-\d{4})?)\b")
+_POSTCODE_UK_RE = re.compile(r"\b[A-Z]{1,2}[0-9][A-Z0-9]?\s?[0-9][A-Z]{2}\b", re.IGNORECASE)
+
+_GPS_RE = re.compile(r"\b(-?\d{1,2}\.\d{3,})\s?,\s?(-?\d{1,3}\.\d{3,})\b")
+_MAC_ADDRESS_RE = re.compile(r"\b[0-9A-Fa-f]{2}([:-])[0-9A-Fa-f]{2}(?:\1[0-9A-Fa-f]{2}){4}\b")
+
+_DOMAIN_TLDS = (
+    "com|net|org|io|co|biz|info|ru|cn|top|xyz|shop|store|club|online|site|link|cc|to|me|tv|cyou|icu"
+)
+_DOMAIN_MENTION_RE = re.compile(
+    r"(?<!@)\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:" + _DOMAIN_TLDS + r")\b", re.IGNORECASE
+)
+
+_DISCORD_ID_RE = re.compile(r"\bdiscord(?:\s*id)?[:\s]{1,3}(\d{17,19})\b", re.IGNORECASE)
+_WHATSAPP_LINK_RE = re.compile(r"\bwa\.me/\d{7,15}\b", re.IGNORECASE)
+
+_RANSOM_KEYWORD_RE = re.compile(r"\b(?:ransom|decrypt(?:ion)?|pay\s+within|deadline)\b", re.IGNORECASE)
+_RANSOM_PROXIMITY_CHARS = 100
+
 MAX_PER_TYPE = 10
 MAX_DECODE_CANDIDATES = 40
 
@@ -176,6 +288,33 @@ def _is_valid_iban(candidate):
 
 def _fingerprint(block):
     return hashlib.sha256(block.encode("utf-8", errors="ignore")).hexdigest()[:16]
+
+
+def _find_swift_bic(text):
+    matches = []
+    for m in _SWIFT_BIC_RE.finditer(text):
+        if m.group(2) in _SWIFT_COUNTRY_CODES:
+            matches.append(m.group(0))
+    return matches
+
+
+def _find_ransom_amounts(text):
+    """Only tags a price match as ransom_amount when it sits within
+    _RANSOM_PROXIMITY_CHARS of a ransom-note-style keyword - the same
+    kind of context check that keeps bin/vendor_handle precise, applied
+    here to tell a ransom demand apart from an ordinary listing price
+    picked up by the same underlying pattern."""
+    keyword_spans = [m.span() for m in _RANSOM_KEYWORD_RE.finditer(text)]
+    if not keyword_spans:
+        return []
+    matches = []
+    for m in _PRICE_RE.finditer(text):
+        start, end = m.span()
+        for kw_start, kw_end in keyword_spans:
+            if abs(start - kw_end) <= _RANSOM_PROXIMITY_CHARS or abs(kw_start - end) <= _RANSOM_PROXIMITY_CHARS:
+                matches.append(m.group(0))
+                break
+    return matches
 
 
 def _is_mostly_printable(decoded):
@@ -261,6 +400,18 @@ def extract_entities(text):
     add("social_handle", _DISCORD_RE.findall(text) + _X_HANDLE_RE.findall(text) + [m.lower() for m in _SESSION_ID_RE.findall(text)])
     add("company_identifier", [m.strip() for m in _COMPANY_RE.findall(text)])
     add("encoded_blob", [_fingerprint(c) for c in (_BASE64_CANDIDATE_RE.findall(text) + _HEX_CANDIDATE_RE.findall(text))[:MAX_DECODE_CANDIDATES]])
+    add("file_hash", [m.lower() for m in _FILE_HASH_RE.findall(text)])
+    add("crypto_tx_hash", [m.lower() for m in _CRYPTO_TX_HASH_RE.findall(text)])
+    add("altcoin_address", _LITECOIN_RE.findall(text) + _TRON_RE.findall(text))
+    add("swift_bic", _find_swift_bic(text))
+    add("postcode_us", _POSTCODE_US_RE.findall(text))
+    add("postcode_uk", [m.upper() for m in _POSTCODE_UK_RE.findall(text)])
+    add("gps_coordinates", [f"{lat},{lon}" for lat, lon in _GPS_RE.findall(text)])
+    add("mac_address", [m.group(0).lower() for m in _MAC_ADDRESS_RE.finditer(text)])
+    add("domain_mention", [m.lower() for m in _DOMAIN_MENTION_RE.findall(text)])
+    add("discord_id", _DISCORD_ID_RE.findall(text))
+    add("whatsapp_link", [m.lower() for m in _WHATSAPP_LINK_RE.findall(text)])
+    add("ransom_amount", _find_ransom_amounts(text))
 
     # Re-scan anything that decoded to genuine readable text for the same
     # plain-value entity types - a hidden BTC address or email inside a
