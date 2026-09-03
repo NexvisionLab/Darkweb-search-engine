@@ -121,6 +121,17 @@ CREATE TABLE IF NOT EXISTS page_entities (
 CREATE INDEX IF NOT EXISTS idx_page_entities_lookup ON page_entities(entity_type, entity_value);
 CREATE INDEX IF NOT EXISTS idx_page_entities_page ON page_entities(page_id);
 
+-- extracted_at now means "first seen" (set once, never updated again -
+-- rows that predate this migration already lost their true first-seen
+-- time to the old clear-and-reinsert behavior, so their extracted_at is
+-- only an approximation). last_seen_at/sighting_count refresh on every
+-- re-crawl that reconfirms the same value; still_present flips false
+-- (row is kept, not deleted) when a re-crawl no longer finds it.
+ALTER TABLE page_entities ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE page_entities ADD COLUMN IF NOT EXISTS sighting_count INT NOT NULL DEFAULT 1;
+ALTER TABLE page_entities ADD COLUMN IF NOT EXISTS still_present BOOLEAN NOT NULL DEFAULT true;
+CREATE INDEX IF NOT EXISTS idx_page_entities_value_last_seen ON page_entities(entity_type, entity_value, last_seen_at DESC);
+
 CREATE TABLE IF NOT EXISTS digest_subscriptions (
     id                BIGSERIAL PRIMARY KEY,
     email             TEXT NOT NULL UNIQUE,

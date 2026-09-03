@@ -310,7 +310,8 @@ def search_entities(conn, entity_type, value, limit=20, offset=0):
         cur.execute(
             """
             SELECT p.url, p.title, p.content_category, p.published_at,
-                   d.host, d.safety_rating, d.is_up, d.last_seen_at, pe.entity_value
+                   d.host, d.safety_rating, d.is_up, d.last_seen_at,
+                   pe.entity_value, pe.extracted_at, pe.last_seen_at, pe.sighting_count, pe.still_present
             FROM page_entities pe
             JOIN pages p ON p.id = pe.page_id
             JOIN domains d ON d.id = pe.domain_id
@@ -337,8 +338,13 @@ def search_entities(conn, entity_type, value, limit=20, offset=0):
             "is_up": is_up,
             "last_seen_at": last_seen,
             "snippet": f"Matched {entity_type}: {entity_value}",
+            "entity_first_seen_at": first_seen,
+            "entity_last_seen_at": entity_last_seen,
+            "entity_sighting_count": sighting_count,
+            "entity_still_present": still_present,
         }
-        for url, title, category, published, host, rating, is_up, last_seen, entity_value in rows
+        for url, title, category, published, host, rating, is_up, last_seen,
+            entity_value, first_seen, entity_last_seen, sighting_count, still_present in rows
     ]
     return results, total
 
@@ -360,7 +366,7 @@ def get_recent_cve_mentions(conn, limit=20):
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT entity_value, count(*) AS mentions, max(extracted_at) AS last_seen
+            SELECT entity_value, count(*) AS mentions, max(last_seen_at) AS last_seen
             FROM page_entities
             WHERE entity_type = %s
             GROUP BY entity_value
