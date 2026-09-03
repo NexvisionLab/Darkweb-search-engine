@@ -1,0 +1,8 @@
+[Unit]
+Description=Clamp TCP MSS on the Astrill VPN tunnel (tun0) to prevent PMTUD blackholes
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/darkweb-mss-clamp.sh

@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically capture/refresh domain preview screenshots
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=2h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

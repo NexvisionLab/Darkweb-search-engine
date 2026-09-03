@@ -1,0 +1,10 @@
+[Unit]
+Description=DarkNyx weekly digest email
+After=network.target
+
+[Service]
+Type=oneshot
+User=darknyx
+WorkingDirectory=/opt/darknyx/crawler
+EnvironmentFile=/opt/darknyx/.env
+ExecStart=/opt/darknyx/crawler/.venv/bin/python3 scripts/send_weekly_digest.py

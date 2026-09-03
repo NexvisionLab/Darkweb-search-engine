@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: darkweb-postgres
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  opensearch:
+    image: opensearchproject/opensearch:3.6.0
+    container_name: darkweb-opensearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS}
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - osdata:/usr/share/opensearch/data
+    ports:
+      - "127.0.0.1:9200:9200"
+
+  tor-privoxy-0:
+    build: ./tor-proxy
+    container_name: darkweb-tor-privoxy-0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8118:8118"
+
+  redis:
+    image: valkey/valkey:8-alpine
+    container_name: darkweb-valkey
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+
+volumes:
+  pgdata:
+  osdata:
+  redisdata:

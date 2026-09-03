@@ -1,0 +1,3 @@
+# One .onion URL per line. Deliberately empty in source control - populate
+# with currently-live, verified addresses (e.g. from Ahmia's own listings)
+# before running a real crawl. Lines starting with # are ignored.

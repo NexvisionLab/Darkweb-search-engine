@@ -1,0 +1,1563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DarkNyx — Dark Web Search Engine &amp; Threat Intelligence</title>
+<meta name="description" content="DarkNyx is a free dark web search engine and threat intelligence platform from NexVision Lab: search onion sites and leak dumps, track ransomware group activity, monitor marketplace listings, and check your own exposure with free OSINT safety tools.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://darknyx.com/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 340'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='20%25'%3E%3Cstop offset='0%25' stop-color='%231b2340'/%3E%3Cstop offset='100%25' stop-color='%234f83d6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='16' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M20 20 L200 300 L380 20 Z'/%3E%3Cpath d='M80 150 L320 150'/%3E%3Cpath d='M200 60 L200 300'/%3E%3Cpath d='M200 150 L20 20'/%3E%3Cpath d='M200 150 L380 20'/%3E%3Cpath d='M200 150 L80 150'/%3E%3Cpath d='M200 150 L320 150'/%3E%3Cpath d='M200 150 L200 300'/%3E%3C/g%3E%3C/svg%3E">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DarkNyx">
+<meta property="og:title" content="DarkNyx — Dark Web Search Engine &amp; Threat Intelligence">
+<meta property="og:description" content="Free dark web search, ransomware activity tracking, marketplace monitoring, and OSINT safety tools from NexVision Lab.">
+<meta property="og:url" content="https://darknyx.com/">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DarkNyx — Dark Web Search Engine &amp; Threat Intelligence">
+<meta name="twitter:description" content="Free dark web search, ransomware activity tracking, marketplace monitoring, and OSINT safety tools from NexVision Lab.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "DarkNyx",
+  "url": "https://darknyx.com/",
+  "description": "A free dark web search engine and threat intelligence platform: search onion sites, track ransomware group activity, monitor dark web marketplaces, and access free OSINT safety tools.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "NexVision Lab",
+    "url": "https://nexvisionlab.com/"
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://darknyx.com/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#f6f4ee; --paper-raised:#ffffff;
+    --ink:#1b1d1f; --ink-soft:#565b60; --ink-faint:#8b9096;
+    --line:#dcd8cd; --line-strong:#c4bfb2;
+    --accent:#b5581e; --accent-soft:#e9d4c0;
+    --accent-2:#33635f; --accent-2-soft:#d7e4e0;
+    --good:#3d7a4e; --good-soft:#dbe9dc;
+    --warn:#a5760f; --warn-soft:#f0e2c3;
+    --bad:#a13a3a; --bad-soft:#f1d9d6;
+    --neutral:#565b60; --neutral-soft:#e4e1d8;
+    --shadow: 0 1px 2px rgba(27,29,31,0.06), 0 6px 20px -8px rgba(27,29,31,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#15181a; --paper-raised:#1c2023;
+      --ink:#eae6dc; --ink-soft:#a7aeb3; --ink-faint:#767d82;
+      --line:#2c3134; --line-strong:#3a4044;
+      --accent:#e08a4c; --accent-soft:#3a2c1e;
+      --accent-2:#7fb8b0; --accent-2-soft:#1e2f2c;
+      --good:#7fc191; --good-soft:#1c2c20;
+      --warn:#e3b653; --warn-soft:#332a15;
+      --bad:#e28080; --bad-soft:#331f1f;
+      --neutral:#a7aeb3; --neutral-soft:#2c3134;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 24px -8px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#15181a; --paper-raised:#1c2023;
+    --ink:#eae6dc; --ink-soft:#a7aeb3; --ink-faint:#767d82;
+    --line:#2c3134; --line-strong:#3a4044;
+    --accent:#e08a4c; --accent-soft:#3a2c1e;
+    --accent-2:#7fb8b0; --accent-2-soft:#1e2f2c;
+    --good:#7fc191; --good-soft:#1c2c20;
+    --warn:#e3b653; --warn-soft:#332a15;
+    --bad:#e28080; --bad-soft:#331f1f;
+    --neutral:#a7aeb3; --neutral-soft:#2c3134;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 24px -8px rgba(0,0,0,0.5);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--paper); color:var(--ink); font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  a{ color:var(--accent); }
+  .mono{ font-family:"IBM Plex Mono", ui-monospace, monospace; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 clamp(1rem,4vw,1.5rem); }
+
+  header.top{ border-bottom:1px solid var(--line); padding:2.6rem 0 2.2rem; }
+  .brand{ display:flex; align-items:center; justify-content:space-between; gap:0.6rem; margin-bottom:0.3rem; }
+  .brand-lockup{ display:flex; align-items:center; gap:0.55rem; }
+  .brand-logo{ width:22px; height:auto; flex-shrink:0; }
+  .tor-link{
+    display:inline-flex; align-items:center; gap:0.4rem; font-family:"IBM Plex Mono",monospace;
+    font-size:0.76rem; color:var(--accent-2); text-decoration:none; padding:0.35rem 0.7rem;
+    border:1px solid var(--line-strong); border-radius:999px; white-space:nowrap;
+  }
+  .tor-link:hover{ background:var(--accent-2-soft); border-color:transparent; }
+  .tor-icon{ width:15px; height:15px; flex-shrink:0; }
+  .brand .mark{ font-family:"Source Serif 4", Georgia, serif; font-weight:700; font-size:1.5rem; letter-spacing:-0.01em; }
+  .brand .dot{ color:var(--accent); }
+  .tagline{ color:var(--ink-soft); font-size:0.95rem; margin:0 0 1.6rem; }
+
+  form.search{ display:flex; gap:0.5rem; }
+  .search input[type="search"]{
+    flex:1; font:inherit; font-size:1.05rem; padding:0.85rem 1rem; border-radius:10px;
+    border:1px solid var(--line-strong); background:var(--paper-raised); color:var(--ink);
+    box-shadow:var(--shadow);
+  }
+  .search input[type="search"]:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .search button{
+    font:inherit; font-weight:600; padding:0 1.4rem; border-radius:10px; border:none;
+    background:var(--accent); color:#fff9f4; cursor:pointer;
+  }
+  .search button:hover{ filter:brightness(1.06); }
+  .search select{
+    font:inherit; font-size:0.92rem; padding:0 0.9rem; border-radius:10px;
+    border:1px solid var(--line-strong); background:var(--paper-raised); color:var(--ink-soft);
+  }
+  .search select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1rem; }
+  .chip{
+    font-family:"IBM Plex Mono",monospace; font-size:0.74rem; padding:0.32rem 0.7rem; border-radius:999px;
+    border:1px solid var(--line-strong); background:var(--paper-raised); color:var(--ink-soft); cursor:pointer;
+  }
+  .chip.active{ background:var(--accent-soft); color:var(--accent); border-color:transparent; font-weight:600; }
+
+  /* Search layout: a sticky category/rating rail beside the results column. */
+  .search-layout{ display:flex; gap:2.4rem; align-items:flex-start; }
+  .search-main{ min-width:0; flex:1; }
+  .search-rail{ width:232px; flex-shrink:0; display:flex; flex-direction:column; gap:1.8rem; position:sticky; top:1.2rem; }
+  .rail-title{ font-family:"IBM Plex Mono",monospace; font-size:0.7rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-faint); padding:0 0 0.4rem; }
+  .rail-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.1rem; }
+  .rail-item{
+    display:flex; align-items:center; justify-content:space-between; gap:0.6rem; padding:0.45rem 0.6rem;
+    border-radius:8px; border:none; background:none; font:inherit; font-size:0.88rem; color:var(--ink-soft);
+    cursor:pointer; text-align:left; width:100%;
+  }
+  .rail-item:hover{ background:var(--paper-raised); }
+  .rail-item .count{ font-family:"IBM Plex Mono",monospace; font-size:0.74rem; color:var(--ink-faint); }
+  .rail-item.active{ background:var(--accent-soft); color:var(--accent); font-weight:600; }
+  .rail-item.active .count{ color:var(--accent); }
+  .rating-legend{ display:flex; flex-direction:column; gap:0.6rem; }
+  .rating-legend-row{ display:flex; align-items:center; gap:0.7rem; font-size:0.86rem; color:var(--ink-soft); }
+  .rating-legend-row .badge{ min-width:92px; font-size:0.7rem; padding:0.28rem 0.7rem; text-align:center; justify-content:center; flex-shrink:0; }
+  @media (max-width:980px){
+    .search-layout{ flex-direction:column; }
+    .search-rail{ width:100%; position:static; flex-direction:row; flex-wrap:wrap; gap:1.4rem; }
+    .rail-list{ flex-direction:row; flex-wrap:wrap; gap:0.4rem; }
+    .rail-item{ width:auto; border:1px solid var(--line-strong); border-radius:999px; padding:0.32rem 0.7rem; }
+    .rail-item.active{ border-color:transparent; }
+    .rating-legend{ flex-direction:row; flex-wrap:wrap; gap:0.9rem; }
+  }
+
+  .stats-strip{ display:flex; gap:1.8rem; margin-top:1.4rem; font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--ink-faint); }
+  .stats-strip b{ color:var(--ink-soft); font-weight:600; }
+
+  .tabs{ display:flex; gap:0.3rem; margin-top:1.6rem; margin-bottom:1.4rem; border-bottom:1px solid var(--line); }
+  .tab{ font:inherit; font-size:0.86rem; font-weight:500; padding:0.55rem 0.9rem; border:none; background:none;
+    color:var(--ink-faint); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .tab.active{ color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
+  .tab:hover{ color:var(--ink); }
+
+  .group-info-card{ border:1px solid var(--line); background:var(--paper-raised); border-radius:10px; padding:0.9rem 1.1rem; margin-bottom:1rem; box-shadow:var(--shadow); }
+  .group-info-loading{ color:var(--ink-faint); font-size:0.86rem; }
+  .group-info-head{ font-family:"Source Serif 4",Georgia,serif; font-weight:600; font-size:0.98rem; margin-bottom:0.5rem; }
+  .group-info-source{ font-family:"IBM Plex Mono",monospace; font-weight:400; font-size:0.7rem; color:var(--ink-faint); margin-left:0.3rem; }
+  .group-info-row{ display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; padding:0.4rem 0; font-size:0.86rem; border-bottom:1px solid var(--line); }
+  .group-info-row:last-child{ border-bottom:none; }
+  .group-info-fqdn{ word-break:break-all; color:var(--ink-soft); font-size:0.78rem; min-width:0; flex:1; }
+  .mirror-preview-btn{
+    font-family:"IBM Plex Mono",monospace; font-size:0.7rem; padding:0.22rem 0.6rem; border-radius:6px;
+    border:1px solid var(--line-strong); background:var(--paper); color:var(--ink-soft); cursor:pointer; white-space:nowrap;
+  }
+  .mirror-preview-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .mirror-preview-img{ width:220px; height:140px; object-fit:cover; border-radius:8px; border:1px solid var(--line); margin:0.5rem 0; display:block; }
+
+  .victim-card{
+    display:flex; gap:1.2rem; align-items:flex-start; padding:1.1rem 1.3rem; margin-bottom:0.8rem;
+    border:1px solid var(--line); background:var(--paper-raised); border-radius:10px; box-shadow:var(--shadow);
+  }
+  .victim-thumb{ width:200px; height:128px; object-fit:cover; border-radius:8px; border:1px solid var(--line); flex-shrink:0; background:var(--paper); }
+  .victim-thumb-placeholder{
+    width:200px; height:128px; border-radius:8px; border:1px dashed var(--line-strong); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; color:var(--ink-faint); font-size:0.72rem; text-align:center; padding:0.5rem;
+  }
+  .victim-body{ min-width:0; flex:1; }
+  .victim-head{ display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap; }
+  .victim-card .group{ font-family:"IBM Plex Mono",monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.03em;
+    color:var(--bad); background:var(--bad-soft); padding:0.18rem 0.55rem; border-radius:999px; white-space:nowrap; }
+  .victim-card .name{ flex:1; font-family:"Source Serif 4",Georgia,serif; font-weight:600; font-size:1.02rem; min-width:120px; }
+  .victim-card .when{ font-family:"IBM Plex Mono",monospace; font-size:0.76rem; color:var(--ink-faint); white-space:nowrap; }
+  .victim-desc{ margin:0.4rem 0 0; font-size:0.88rem; color:var(--ink-soft); max-width:70ch; }
+  .victim-links{ display:flex; align-items:center; gap:1rem; margin-top:0.6rem; flex-wrap:wrap; }
+  .victim-link{ font-size:0.82rem; color:var(--accent-2); text-decoration:none; }
+  .victim-link:hover{ text-decoration:underline; }
+  .victim-magnet{ font-family:"IBM Plex Mono",monospace; font-size:0.72rem; color:var(--ink-faint); }
+  @media (max-width:760px){ .victim-thumb, .victim-thumb-placeholder{ width:120px; height:80px; } }
+  @media (max-width:520px){ .victim-thumb, .victim-thumb-placeholder{ display:none; } }
+
+  .trend-table{ width:100%; border-collapse:collapse; font-size:0.88rem; }
+  .trend-table th{ text-align:left; font-family:"IBM Plex Mono",monospace; font-size:0.68rem; text-transform:uppercase;
+    letter-spacing:0.04em; color:var(--ink-faint); padding:0.5rem 0.7rem; border-bottom:1px solid var(--line-strong); }
+  .trend-table td{ padding:0.6rem 0.7rem; border-bottom:1px solid var(--line); font-family:"IBM Plex Mono",monospace; }
+  .trend-table td.domain{ font-size:0.8rem; word-break:break-all; font-family:"IBM Plex Mono",monospace; }
+  .trend-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:8px; background:var(--paper-raised); box-shadow:var(--shadow); }
+
+  .tools-group{ margin-bottom:2.4rem; }
+  .tools-group-head{ display:flex; align-items:baseline; gap:0.9rem; flex-wrap:wrap; margin-bottom:1.1rem; }
+  .tools-group-head h2{ font-family:"Source Serif 4",Georgia,serif; font-size:1.3rem; font-weight:600; margin:0; }
+  .tools-group-head span{ color:var(--ink-faint); font-size:0.88rem; }
+  .tools-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:1rem; }
+  .tool-card{ display:flex; flex-direction:column; border:1px solid var(--line); background:var(--paper-raised); border-radius:10px; padding:1.3rem 1.4rem; margin-bottom:0; box-shadow:var(--shadow); }
+  .tool-card.featured{ grid-column:1 / -1; border-color:var(--line-strong); }
+  .tool-card .tool-row{ margin-top:auto; }
+  .tool-card .tool-row + .tool-row{ margin-top:0.6rem; }
+  .tool-card-head{ display:flex; align-items:center; gap:0.85rem; margin-bottom:0.7rem; }
+  .tool-icon{ width:38px; height:38px; border-radius:10px; background:var(--accent-2-soft); color:var(--accent-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .tool-icon.warm{ background:var(--accent-soft); color:var(--accent); }
+  .tool-card-head-text{ min-width:0; }
+  .tool-card h3{ font-family:"Source Serif 4",Georgia,serif; font-size:1.05rem; font-weight:600; margin:0 0 0.15rem; }
+  .tool-desc{ color:var(--ink-soft); font-size:0.88rem; margin:0 0 0.9rem; max-width:60ch; }
+  .tool-card-head .tool-desc{ margin:0; }
+  .tool-row{ display:flex; gap:0.6rem; flex-wrap:wrap; }
+  .tool-row input[type="email"], .tool-row input[type="text"]{ flex:1; min-width:200px; font:inherit; padding:0.6rem 0.8rem; border-radius:8px; border:1px solid var(--line-strong); background:var(--paper); color:var(--ink); }
+  .tool-row textarea{ flex:1; min-width:200px; font:inherit; font-size:0.9rem; padding:0.6rem 0.8rem; border-radius:8px; border:1px solid var(--line-strong); background:var(--paper); color:var(--ink); resize:vertical; }
+  .tool-row input[type="file"]{ flex:1; min-width:200px; font:inherit; font-size:0.85rem; color:var(--ink-soft); }
+  .tool-row button, #tor-check-btn{ font:inherit; font-weight:600; padding:0.6rem 1.1rem; border-radius:8px; border:none; background:var(--accent); color:#fff9f4; cursor:pointer; white-space:nowrap; }
+  .tool-row button:hover, #tor-check-btn:hover{ filter:brightness(1.06); }
+  .tool-result{ margin-top:0.9rem; font-size:0.9rem; }
+  .tool-result:empty{ margin-top:0; }
+  .tool-note{ padding:0.7rem 0.9rem; border-radius:8px; }
+  .tool-note.good{ background:var(--good-soft); color:var(--good); }
+  .tool-note.bad{ background:var(--bad-soft); color:var(--bad); }
+  .tool-note.neutral{ background:var(--neutral-soft); color:var(--ink-soft); }
+  .check-list{ list-style:none; padding:0; margin:0.6rem 0 0; }
+  .check-list li{ display:flex; gap:0.6rem; align-items:baseline; padding:0.35rem 0; font-size:0.88rem; }
+  .check-list .mark{ font-family:"IBM Plex Mono",monospace; font-weight:600; }
+  .check-list .mark.pass{ color:var(--good); }
+  .check-list .mark.fail{ color:var(--bad); }
+  .tool-result code{ font-family:"IBM Plex Mono",monospace; background:var(--paper); padding:0.1rem 0.35rem; border-radius:4px; font-size:0.85em; word-break:break-all; }
+
+  .guide-section{ margin-bottom:2rem; }
+  .guide-section h2{ font-family:"Source Serif 4",Georgia,serif; font-size:1.3rem; font-weight:600; margin:0 0 0.7rem; }
+  .guide-section p{ color:var(--ink-soft); font-size:0.95rem; max-width:68ch; margin:0 0 0.8rem; }
+  .guide-section ul{ color:var(--ink-soft); font-size:0.95rem; max-width:68ch; padding-left:1.2rem; margin:0 0 0.8rem; }
+  .guide-section li{ margin-bottom:0.4rem; }
+  .rating-row{ display:flex; align-items:baseline; gap:0.7rem; margin-bottom:0.5rem; }
+  .rating-row p{ margin:0; }
+
+  .scam-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:1rem; }
+  .scam-card{ border:1px solid var(--line); background:var(--paper-raised); border-radius:10px; padding:1.1rem 1.2rem; box-shadow:var(--shadow); }
+  .scam-card h3{ font-family:"Source Serif 4",Georgia,serif; font-size:1rem; font-weight:600; margin:0 0 0.5rem; }
+  .scam-example{ font-size:0.86rem; color:var(--ink-soft); background:var(--paper); border-left:3px solid var(--accent-2); padding:0.6rem 0.8rem; border-radius:0 6px 6px 0; margin-bottom:0.7rem; font-style:italic; }
+  .scam-flags{ font-size:0.84rem; color:var(--ink-faint); padding-left:1.1rem; margin:0; }
+  .scam-flags li{ margin-bottom:0.25rem; }
+
+  main{ padding:2rem 0 5rem; }
+  .status-line{ color:var(--ink-faint); font-size:0.88rem; margin-bottom:1.2rem; }
+
+  .result{
+    border:1px solid var(--line); background:var(--paper-raised); border-radius:10px;
+    padding:1.1rem 1.3rem; margin-bottom:0.9rem; box-shadow:var(--shadow);
+  }
+  .result-layout{ display:flex; gap:1.4rem; align-items:flex-start; }
+  .result-thumb{
+    width:280px; height:176px; object-fit:cover; border-radius:8px; border:1px solid var(--line);
+    flex-shrink:0; background:var(--paper);
+  }
+  .result-body{ min-width:0; flex:1; }
+  @media (max-width:760px){ .result-thumb{ width:160px; height:100px; } }
+  @media (max-width:520px){ .result-thumb{ display:none; } }
+  .result-head{ display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.35rem; }
+  .result-favicon{ width:18px; height:18px; border-radius:4px; flex-shrink:0; }
+  .result-title{ font-family:"Source Serif 4",Georgia,serif; font-weight:600; font-size:1.12rem; margin:0; }
+  .badge{ font-family:"IBM Plex Mono",monospace; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.05em; padding:0.16rem 0.55rem; border-radius:999px; white-space:nowrap; }
+  .badge.good{ background:var(--good-soft); color:var(--good); }
+  .badge.warn{ background:var(--warn-soft); color:var(--warn); }
+  .badge.bad{ background:var(--bad-soft); color:var(--bad); }
+  .badge.neutral{ background:var(--neutral-soft); color:var(--neutral); }
+  .badge.category{ background:var(--accent-2-soft); color:var(--accent-2); }
+
+  .result-url{ font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--ink-faint); word-break:break-all; margin-bottom:0.5rem; }
+  .result-url a{ color:var(--ink-faint); text-decoration:none; }
+  .result-url a:hover{ text-decoration:underline; }
+  .last-seen{ font-family:"IBM Plex Sans",sans-serif; }
+  .result-mirrors{ font-family:"IBM Plex Sans",sans-serif; font-size:0.78rem; color:var(--ink-faint); margin-top:0.15rem; }
+  .result-mirrors a{ color:var(--accent-2); text-decoration:none; }
+  .result-mirrors a:hover{ text-decoration:underline; }
+  .result-preview-desc{ font-family:"IBM Plex Sans",sans-serif; font-size:0.78rem; font-style:italic; color:var(--ink-faint); margin-top:0.15rem; }
+  .result-snippet{ color:var(--ink-soft); font-size:0.94rem; }
+  .result-snippet em{ background:var(--accent-soft); color:var(--ink); font-style:normal; border-radius:3px; padding:0 0.15em; }
+  .summarize-btn{
+    margin-top:0.6rem; font-family:"IBM Plex Mono",monospace; font-size:0.72rem; padding:0.3rem 0.7rem;
+    border-radius:6px; border:1px solid var(--line-strong); background:var(--paper-raised); color:var(--ink-soft); cursor:pointer;
+  }
+  .summarize-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .summarize-btn:disabled{ opacity:0.6; cursor:default; }
+  .summarize-result{ margin-top:0.6rem; padding:0.7rem 0.9rem; border-radius:8px; background:var(--accent-soft); color:var(--ink); font-size:0.9rem; }
+
+  .reveal-gate{
+    display:flex; align-items:center; gap:0.6rem; font-size:0.86rem; color:var(--warn);
+    background:var(--warn-soft); border-radius:8px; padding:0.55rem 0.8rem; margin-bottom:0.5rem;
+  }
+  .reveal-gate button{
+    font:inherit; font-weight:600; font-size:0.8rem; padding:0.3rem 0.7rem; border-radius:6px; border:1px solid currentColor;
+    background:transparent; color:inherit; cursor:pointer;
+  }
+
+  .empty, .loading{ color:var(--ink-faint); font-size:0.94rem; padding:2rem 0; text-align:center; }
+
+  footer{ border-top:1px solid var(--line); padding:1.8rem 0 2.6rem; color:var(--ink-faint); font-size:0.82rem; }
+  footer p{ max-width:60ch; margin:0.3rem 0; }
+  .footer-top{ display:flex; align-items:baseline; flex-wrap:wrap; gap:0.15rem 0.6rem; margin-bottom:0.9rem; }
+  .footer-brand{ font-family:"Source Serif 4", Georgia, serif; font-weight:700; font-size:1.05rem; color:var(--ink-soft); letter-spacing:-0.01em; }
+  .footer-brand .dot{ color:var(--accent); }
+  .footer-by{ font-size:0.8rem; }
+  .footer-by a{ color:var(--accent-2); text-decoration:none; border-bottom:1px solid transparent; }
+  .footer-by a:hover{ border-bottom-color:currentColor; }
+  .footer-meta{ margin-top:0.9rem; padding-top:0.9rem; border-top:1px solid var(--line); font-size:0.76rem; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <span class="brand-lockup">
+          <svg class="brand-logo" viewBox="0 0 400 340" aria-hidden="true">
+            <defs>
+              <linearGradient id="brand-logo-g" x1="0%" y1="0%" x2="100%" y2="20%">
+                <stop offset="0%" stop-color="#1b2340"/>
+                <stop offset="100%" stop-color="#4f83d6"/>
+              </linearGradient>
+            </defs>
+            <g fill="none" stroke="url(#brand-logo-g)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round">
+              <path d="M20 20 L200 300 L380 20 Z"/>
+              <path d="M80 150 L320 150"/>
+              <path d="M200 60 L200 300"/>
+              <path d="M200 150 L20 20"/>
+              <path d="M200 150 L380 20"/>
+              <path d="M200 150 L80 150"/>
+              <path d="M200 150 L320 150"/>
+              <path d="M200 150 L200 300"/>
+            </g>
+          </svg>
+          <span class="mark">DarkNyx<span class="dot">.</span></span>
+        </span>
+        <a class="tor-link" href="https://www.torproject.org/download/" target="_blank" rel="noopener noreferrer" title="Get Tor Browser — needed to open .onion links">
+          <svg class="tor-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+          </svg>
+          Get Tor Browser
+        </a>
+      </div>
+      <p class="tagline">A free dark web search engine and threat intelligence platform from NexVision Lab OSINT — marketplace monitoring, ransomware leak tracking, and content classification, indexed over Tor.</p>
+      <nav class="tabs" id="tabs">
+        <button type="button" class="tab active" data-tab="search">Search</button>
+        <button type="button" class="tab" data-tab="ransomware">Ransomware Activity</button>
+        <button type="button" class="tab" data-tab="marketplace">Marketplace Trends</button>
+        <button type="button" class="tab" data-tab="tools">Tools</button>
+        <button type="button" class="tab" data-tab="guide">Safety Guide</button>
+      </nav>
+      <div id="search-controls">
+        <form class="search" id="search-form">
+          <select id="entity-type" aria-label="Search by">
+            <option value="">All content</option>
+            <option value="semantic">Similar meaning</option>
+            <option value="email">Email address</option>
+            <option value="btc">Bitcoin address</option>
+            <option value="eth">Ethereum address</option>
+            <option value="xmr">Monero address</option>
+            <option value="ip">IP address</option>
+            <option value="phone">Phone number</option>
+            <option value="api_key">API key</option>
+            <option value="iban">IBAN</option>
+            <option value="certificate">Certificate</option>
+            <option value="private_key">Private key</option>
+            <option value="cve">CVE</option>
+            <option value="session_token">Session token</option>
+            <option value="bin">Card BIN</option>
+            <option value="card_type">Card data type</option>
+            <option value="price">Price mention</option>
+            <option value="telegram_handle">Telegram handle</option>
+            <option value="vendor_handle">Vendor/seller handle</option>
+            <option value="bitcoin_private_key">Bitcoin private key</option>
+            <option value="crypto_wallet_seed_phrase">Wallet seed phrase</option>
+            <option value="pgp_key">PGP key</option>
+            <option value="sql_injection">SQL injection string</option>
+            <option value="onion_link">.onion link</option>
+            <option value="social_handle">Social handle</option>
+            <option value="company_identifier">Company name</option>
+            <option value="encoded_blob">Hidden encoded data</option>
+          </select>
+          <input type="search" id="q" name="q" placeholder="Search onion sites, leaks, marketplaces…" autocomplete="off">
+          <button type="submit">Search</button>
+        </form>
+      </div>
+      <div class="stats-strip" id="stats-strip"></div>
+    </header>
+
+    <main>
+      <div id="view-search">
+        <div class="search-layout">
+          <aside class="search-rail">
+            <div>
+              <div class="rail-title">Categories</div>
+              <ul class="rail-list" id="category-rail"></ul>
+            </div>
+            <div>
+              <div class="rail-title">Safety ratings</div>
+              <div class="rating-legend">
+                <div class="rating-legend-row"><span class="badge good">Verified</span>Owner confirmed</div>
+                <div class="rating-legend-row"><span class="badge neutral">Unrated</span>No clear signal</div>
+                <div class="rating-legend-row"><span class="badge warn">Suspicious</span>Illicit listings</div>
+                <div class="rating-legend-row"><span class="badge bad">Dangerous</span>Leaks, fraud, malware</div>
+              </div>
+            </div>
+          </aside>
+          <div class="search-main">
+            <div class="status-line" id="status-line"></div>
+            <div id="results"></div>
+          </div>
+        </div>
+      </div>
+      <div id="view-ransomware" style="display:none">
+        <div class="chips" id="group-chips"></div>
+        <div id="group-info"></div>
+        <div class="status-line" id="ransomware-status"></div>
+        <div id="ransomware-list"></div>
+      </div>
+      <div id="view-marketplace" style="display:none">
+        <div class="status-line" id="marketplace-status"></div>
+        <div id="marketplace-list"></div>
+      </div>
+      <div id="view-tools" style="display:none">
+
+        <div class="tools-group">
+          <div class="tools-group-head"><h2>Check something</h2><span>Paste a link, a message, or a QR code — get a verdict.</span></div>
+          <div class="tools-grid">
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div>
+                <div class="tool-card-head-text"><h3>URL / site safety checker</h3><p class="tool-desc">Onion or clearnet — checks our crawl first, falls back to a live check.</p></div>
+              </div>
+              <div class="tool-row">
+                <input type="text" id="checkurl-input" placeholder="example.onion or https://example.com" autocomplete="off">
+                <button type="button" id="checkurl-btn">Check</button>
+              </div>
+              <div class="tool-result" id="checkurl-result"></div>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M6 6L5 3H2"/></svg></div>
+                <div class="tool-card-head-text"><h3>Fake online shop checker</h3><p class="tool-desc">Unrealistic discounts, no contact details, pressure to buy now.</p></div>
+              </div>
+              <div class="tool-row">
+                <input type="text" id="checkshop-input" placeholder="the-shop.example.com" autocomplete="off">
+                <button type="button" id="checkshop-btn">Check</button>
+              </div>
+              <div class="tool-result" id="checkshop-result"></div>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-12 7l-5 1 1-5a8 8 0 1 1 16-3z"/></svg></div>
+                <div class="tool-card-head-text"><h3>Scam message checker</h3><p class="tool-desc">SMS, WhatsApp, a DM — names the scam pattern it matches.</p></div>
+              </div>
+              <div class="tool-row">
+                <textarea id="checkscam-input" placeholder="Paste the message here…" rows="3"></textarea>
+              </div>
+              <div class="tool-row" style="margin-top:0.6rem"><button type="button" id="checkscam-btn">Check</button></div>
+              <div class="tool-result" id="checkscam-result"></div>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></div>
+                <div class="tool-card-head-text"><h3>Job &amp; investment scam checker</h3><p class="tool-desc">Upfront fees, reshipping asks, guaranteed returns.</p></div>
+              </div>
+              <div class="tool-row">
+                <textarea id="checkjob-input" placeholder="Paste the posting or pitch here…" rows="3"></textarea>
+              </div>
+              <div class="tool-row" style="margin-top:0.6rem"><button type="button" id="checkjob-btn">Check</button></div>
+              <div class="tool-result" id="checkjob-result"></div>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div>
+                <div class="tool-card-head-text"><h3>Phishing email analyzer</h3><p class="tool-desc">Classifies the content and checks up to 3 links inside it.</p></div>
+              </div>
+              <div class="tool-row">
+                <textarea id="checkemail-input" placeholder="Paste the email content here…" rows="4"></textarea>
+              </div>
+              <div class="tool-row" style="margin-top:0.6rem"><button type="button" id="checkemail-btn">Analyze</button></div>
+              <div class="tool-result" id="checkemail-result"></div>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg></div>
+                <div class="tool-card-head-text"><h3>QR code checker</h3><p class="tool-desc">Decodes the code and safety-checks the URL before you scan it.</p></div>
+              </div>
+              <div class="tool-row">
+                <input type="file" id="checkqr-file" accept="image/*">
+                <button type="button" id="checkqr-btn">Check</button>
+              </div>
+              <div class="tool-result" id="checkqr-result"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="tools-group">
+          <div class="tools-group-head"><h2>Protect yourself</h2><span>Your own exposure — hashed, never stored.</span></div>
+          <div class="tools-grid">
+
+            <div class="tool-card featured">
+              <div class="tool-card-head">
+                <div class="tool-icon warm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+                <div class="tool-card-head-text"><h3>Breach &amp; credential exposure checker</h3><p class="tool-desc">Check if an email address appears in data this platform has crawled from real leak-dump pages. Your email is hashed before checking and never stored or logged.</p></div>
+              </div>
+              <div class="tool-row">
+                <input type="email" id="breach-email" placeholder="you@example.com" autocomplete="off">
+                <button type="button" id="breach-check-btn">Check</button>
+              </div>
+              <div class="tool-result" id="breach-result"></div>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <div class="tool-icon warm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M20 16l-5-5-7 7"/></svg></div>
+                <div class="tool-card-head-text"><h3>File metadata scrubber</h3><p class="tool-desc">See what an image exposes (camera, GPS, software) and download a cleaned copy.</p></div>
+              </div>
+              <div class="tool-row">
+                <input type="file" id="scrub-file" accept="image/*">
+                <button type="button" id="scrub-btn">Scrub</button>
+              </div>
+              <div class="tool-result" id="scrub-result"></div>
+            </div>
+
+            <div class="tool-card">
+              <div class="tool-card-head">
+                <div class="tool-icon warm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg></div>
+                <div class="tool-card-head-text"><h3>Tor Browser configuration checker</h3><p class="tool-desc">A quick, client-side check for settings that reduce your anonymity. Not exhaustive.</p></div>
+              </div>
+              <button type="button" id="tor-check-btn">Run check</button>
+              <div class="tool-result" id="tor-result"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px,1fr)); gap:2rem;">
+
+          <div class="tools-group" style="margin-bottom:0">
+            <div class="tools-group-head"><h2>Stay alerted</h2></div>
+            <div class="tools-grid" style="grid-template-columns:1fr">
+
+              <div class="tool-card">
+                <div class="tool-card-head">
+                  <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></div>
+                  <div class="tool-card-head-text"><h3>Watchlist alerts</h3><p class="tool-desc">Get a webhook call the moment an organization or keyword is named on a ransomware leak site. Accepts a plain word or a regex pattern - matching immediately runs against past victims too, not just new ones. No account needed.</p></div>
+                </div>
+                <div class="tool-row">
+                  <input type="text" id="watch-keyword" placeholder="Organization or keyword" autocomplete="off">
+                  <input type="text" id="watch-webhook" placeholder="https://your-webhook-url" autocomplete="off">
+                  <button type="button" id="watch-btn">Watch</button>
+                </div>
+                <div class="tool-result" id="watch-result"></div>
+              </div>
+
+              <div class="tool-card">
+                <div class="tool-card-head">
+                  <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg></div>
+                  <div class="tool-card-head-text"><h3>Weekly digest</h3><p class="tool-desc">A once-a-week email — new ransomware victims and newly flagged Suspicious/Dangerous sites from the last 7 days. One click to unsubscribe any time.</p></div>
+                </div>
+                <div class="tool-row">
+                  <input type="email" id="digest-email" placeholder="you@example.com" autocomplete="off">
+                  <button type="button" id="digest-btn">Subscribe</button>
+                </div>
+                <div class="tool-result" id="digest-result"></div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="tools-group" style="margin-bottom:0">
+            <div class="tools-group-head"><h2>Site operators</h2></div>
+            <div class="tools-grid" style="grid-template-columns:1fr">
+
+              <div class="tool-card">
+                <div class="tool-card-head">
+                  <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V4h12l-1 4 1 4H4"/></svg></div>
+                  <div class="tool-card-head-text"><h3>Report a site</h3><p class="tool-desc">Flag a listed onion address as a scam, phishing clone, or otherwise mislabeled. Reviewed manually before it affects any rating.</p></div>
+                </div>
+                <div class="tool-row">
+                  <input type="text" id="report-host" placeholder="somesite.onion" autocomplete="off">
+                </div>
+                <div class="tool-row" style="margin-top:0.6rem">
+                  <input type="text" id="report-reason" placeholder="What's wrong with it?" autocomplete="off">
+                  <button type="button" id="report-btn">Submit</button>
+                </div>
+                <div class="tool-result" id="report-result"></div>
+              </div>
+
+              <div class="tool-card">
+                <div class="tool-card-head">
+                  <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+                  <div class="tool-card-head-text"><h3>Verify site ownership</h3><p class="tool-desc">Operate a legitimate .onion service? Claim it to get a Verified rating instead of Unrated once we confirm you control it.</p></div>
+                </div>
+                <div class="tool-row">
+                  <input type="text" id="verify-host" placeholder="yoursite.onion" autocomplete="off">
+                  <button type="button" id="verify-btn">Start verification</button>
+                </div>
+                <div class="tool-result" id="verify-result"></div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="view-guide" style="display:none">
+        <div class="guide-section">
+          <h2>Is the dark web dangerous?</h2>
+          <p>Not inherently — the dark web is just a set of sites reachable only through Tor, and Tor itself is a legitimate privacy tool used by journalists, whistleblowers, and anyone who doesn't want their browsing tied to their identity. The risk isn't the network, it's specific content on it: marketplaces selling stolen goods, leak sites hosting real people's stolen data, and no shortage of straightforward scams preying on the assumption that "dark web" means "no rules, so no recourse."</p>
+          <p>The practical risk to <em>you</em> as a visitor is mostly the same as anywhere online — phishing pages, malware disguised as a download, and social engineering — just with less accountability for whoever's running the site. That's what the tools and ratings on this platform are for.</p>
+        </div>
+
+        <div class="guide-section">
+          <h2>How the safety ratings work</h2>
+          <div class="rating-row"><span class="badge good">Verified</span><p>A confirmed legitimate service — its operator has proven ownership through this platform's verification process, or it's a known official mirror.</p></div>
+          <div class="rating-row"><span class="badge neutral">Unrated</span><p>Crawled, nothing specific flagged. Not the same as "safe" — just "nothing detected yet."</p></div>
+          <div class="rating-row"><span class="badge warn">Suspicious</span><p>Signals worth caution: an illicit marketplace, or a pattern matching a documented exit-scam (a sudden shutdown after a spike in activity).</p></div>
+          <div class="rating-row"><span class="badge bad">Dangerous</span><p>Concrete evidence of harm: a confirmed data leak, fraud content, a link to an executable file, or a near-duplicate of a known legitimate site (a phishing clone).</p></div>
+          <p>These come from automatic classification and pattern detection, not manual review of every site — treat a rating as a strong signal, not a guarantee either way.</p>
+        </div>
+
+        <div class="guide-section">
+          <h2>Browsing safely</h2>
+          <ul>
+            <li>Use Tor Browser, keep it updated, and don't resize its window or install extensions — both make you easier to fingerprint. The Tor Browser checker under Tools gives a quick read on your current setup.</li>
+            <li>Never download or run a file from a site you don't already trust. If you must inspect one, check the URL first with the tools here.</li>
+            <li>Never enter a real password, email, or payment detail on a site reached from an unfamiliar link — check it first, the same way you would a suspicious email.</li>
+            <li>Treat "Dangerous" and "Suspicious" ratings as a real stop sign, not a suggestion — the reveal-gate on search results exists so you see the rating before the address, not after.</li>
+            <li>If something looks like a scam, it usually is — see the pattern gallery below for what the common ones actually look like.</li>
+          </ul>
+        </div>
+
+        <div class="guide-section">
+          <h2>Scam pattern gallery</h2>
+          <p>Illustrative examples of the categories the scam-checker tools recognize — real scams vary in wording, but the underlying pattern repeats. Recognizing the pattern matters more than any specific phrase.</p>
+          <div class="scam-grid">
+            <div class="scam-card">
+              <h3>Phishing</h3>
+              <div class="scam-example">"We noticed unusual activity on your account. Verify your identity within 24 hours or it will be suspended."</div>
+              <ul class="scam-flags"><li>Urgency + a login link</li><li>Generic greeting, no your real name</li><li>Domain that's close to, but not, the real one</li></ul>
+            </div>
+            <div class="scam-card">
+              <h3>Romance scam</h3>
+              <div class="scam-example">"I feel so close to you already. I just need help covering a customs fee to finally come see you."</div>
+              <ul class="scam-flags"><li>Fast escalation of intimacy</li><li>Always has a reason not to video call</li><li>Money request tied to travel or an emergency</li></ul>
+            </div>
+            <div class="scam-card">
+              <h3>Crypto / investment scam</h3>
+              <div class="scam-example">"Our algorithm guarantees 40% weekly returns. Early investors are already cashing out — spots close soon."</div>
+              <ul class="scam-flags"><li>Guaranteed returns (no legitimate investment guarantees this)</li><li>Artificial urgency</li><li>Requires an upfront deposit to a wallet you don't control</li></ul>
+            </div>
+            <div class="scam-card">
+              <h3>Fake delivery</h3>
+              <div class="scam-example">"Your package could not be delivered. Pay a $2.99 redelivery fee within 48 hours."</div>
+              <ul class="scam-flags"><li>Small fee (designed to seem not worth questioning)</li><li>Link instead of a real tracking number</li><li>You weren't expecting a package</li></ul>
+            </div>
+            <div class="scam-card">
+              <h3>Tech support scam</h3>
+              <div class="scam-example">"WARNING: Your device has 3 viruses. Call this number immediately or your data will be lost."</div>
+              <ul class="scam-flags"><li>A pop-up or page you can't easily close</li><li>Pushes a phone call, not a real support channel</li><li>Asks you to install remote-access software</li></ul>
+            </div>
+            <div class="scam-card">
+              <h3>Job scam</h3>
+              <div class="scam-example">"Earn $500/day working from home. To get started, purchase your starter kit for $49."</div>
+              <ul class="scam-flags"><li>Payment required before any real work</li><li>Vague job description</li><li>Asks you to reship packages or move money through your own account</li></ul>
+            </div>
+            <div class="scam-card">
+              <h3>Lottery / inheritance scam</h3>
+              <div class="scam-example">"You have been selected to receive $850,000 from an unclaimed estate. A small processing fee is required to release funds."</div>
+              <ul class="scam-flags"><li>You never entered anything</li><li>A fee required to receive money you supposedly already won</li><li>Pressure to act before someone else claims it</li></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="footer-top">
+        <span class="footer-brand mono">DarkNyx<span class="dot">.</span></span>
+        <span class="footer-by">A <a href="https://nexvisionlab.com/" target="_blank" rel="noopener noreferrer">NexVision Lab</a> project</span>
+      </div>
+      <p><strong style="color:var(--ink-soft)">No query logging.</strong> Searches aren't stored or tied to you.</p>
+      <p>Real personal data appearing in leak-dump results is masked by default. Safety ratings (Verified / Unrated / Suspicious / Dangerous) come from automatic content classification, not manual review — treat them as a signal, not a guarantee.</p>
+      <p class="footer-meta">© <span id="footer-year">2026</span> NexVision Lab. DarkNyx is provided for research and personal-safety purposes — it is not a substitute for legal, security, or law-enforcement advice.</p>
+    </footer>
+  </div>
+
+<script>
+(function(){
+  var API = "/api";
+  var footerYearEl = document.getElementById("footer-year");
+  if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+  var CATEGORIES = ["marketplace","forum","leak-dump","fraud","carding","crypto-services","counterfeits","drugs","legitimate-mirror","ransomware","hacking-services","weapons","breach-forum","other"];
+  var state = { q: "", category: null };
+  var categoryCounts = {};
+
+  var form = document.getElementById("search-form");
+  var input = document.getElementById("q");
+  var entityTypeEl = document.getElementById("entity-type");
+  var railEl = document.getElementById("category-rail");
+  var statsEl = document.getElementById("stats-strip");
+  var statusEl = document.getElementById("status-line");
+  var resultsEl = document.getElementById("results");
+
+  function renderChips(){
+    railEl.innerHTML = "";
+    var totalCount = Object.keys(categoryCounts).reduce(function(sum, k){ return sum + categoryCounts[k]; }, 0);
+
+    var allLi = document.createElement("li");
+    var allBtn = document.createElement("button");
+    allBtn.type = "button";
+    allBtn.className = "rail-item" + (state.category === null ? " active" : "");
+    allBtn.innerHTML = "<span>All</span>" + (totalCount ? '<span class="count">' + totalCount + '</span>' : "");
+    allBtn.addEventListener("click", function(){
+      state.category = null;
+      renderChips();
+      runSearch();
+    });
+    allLi.appendChild(allBtn);
+    railEl.appendChild(allLi);
+
+    CATEGORIES.forEach(function(cat){
+      var count = categoryCounts[cat];
+      if (!count) return; // no point offering an empty category to filter by
+      var li = document.createElement("li");
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "rail-item" + (state.category === cat ? " active" : "");
+      btn.innerHTML = "<span>" + escapeHtml(cat) + "</span><span class=\"count\">" + count + "</span>";
+      btn.addEventListener("click", function(){
+        state.category = (state.category === cat) ? null : cat;
+        renderChips();
+        runSearch();
+      });
+      li.appendChild(btn);
+      railEl.appendChild(li);
+    });
+  }
+
+  function loadStats(){
+    fetch(API + "/stats").then(function(r){ return r.json(); }).then(function(d){
+      var dc = d.discovery_counts || {};
+      var discoveredTotal = (dc.pending || 0) + (dc.verified || 0) + (dc.dead || 0);
+      var discoveryHtml = discoveredTotal
+        ? "<span><b>" + (dc.verified || 0) + "</b> discovered via link-following</span>"
+        : "";
+      statsEl.innerHTML =
+        "<span><b>" + d.domain_count + "</b> onion domains indexed</span>" +
+        "<span><b>" + d.page_count + "</b> pages crawled</span>" +
+        discoveryHtml;
+      categoryCounts = d.category_counts || {};
+      renderChips();
+    }).catch(function(){});
+  }
+
+  function timeAgo(iso){
+    if (!iso) return null;
+    var then = new Date(iso).getTime();
+    if (isNaN(then)) return null;
+    var mins = Math.floor((Date.now() - then) / 60000);
+    if (mins < 60) return mins + "m ago";
+    var hours = Math.floor(mins / 60);
+    if (hours < 24) return hours + "h ago";
+    return Math.floor(hours / 24) + "d ago";
+  }
+
+  function escapeHtml(s){
+    if (!s) return "";
+    return s.replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function previewFilename(host){
+    return host.toLowerCase().replace(/[^a-z0-9.]/g, "_") + ".png";
+  }
+
+  function faviconFilename(host){
+    return host.toLowerCase().replace(/[^a-z0-9.]/g, "_") + ".png";
+  }
+
+  function resultCard(r){
+    var sev = (r.safety_rating && r.safety_rating.severity) || "neutral";
+    var label = (r.safety_rating && r.safety_rating.label) || "Unrated";
+    var gated = sev === "warn" || sev === "bad";
+    var title = escapeHtml(r.title) || "(untitled)";
+    // escape everything first (page text is untrusted), then re-open just the
+    // <em> highlight tags OpenSearch added around matched terms
+    var snippet = r.snippet ? escapeHtml(r.snippet)
+      .replace(/&lt;em&gt;/g, "<em>")
+      .replace(/&lt;\/em&gt;/g, "</em>") : "";
+
+    var card = document.createElement("div");
+    card.className = "result";
+
+    var badges = '<span class="badge category">' + escapeHtml(r.content_category || "unrated") + '</span>' +
+                 '<span class="badge ' + sev + '">' + label + '</span>';
+    if (r.is_up === true) badges += '<span class="badge good">Up</span>';
+    else if (r.is_up === false) badges += '<span class="badge bad">Down</span>';
+
+    var seen = timeAgo(r.last_seen_at);
+    var published = timeAgo(r.published_at);
+    var metaBits = [];
+    if (published) metaBits.push("published " + published);
+    if (seen) metaBits.push("last seen " + seen);
+    var seenHtml = metaBits.length ? ' <span class="last-seen">· ' + metaBits.join(" · ") + '</span>' : '';
+
+    var thumbAlt = r.preview_description ? escapeHtml(r.preview_description) : "";
+    var thumbHtml = "";
+    if (r.domain && !gated){
+      thumbHtml = '<img class="result-thumb" src="/previews/' + previewFilename(r.domain) +
+        '" alt="' + thumbAlt + '" loading="lazy" onerror="this.remove()">';
+    } else if (r.domain && gated){
+      // No src until reveal is clicked - an <img> with no src attribute
+      // never issues a network request, so nothing loads before the
+      // visitor deliberately asks to see it. alt text is withheld too
+      // (see mirrorsHtml below for the visible caption, which IS gated).
+      thumbHtml = '<img class="result-thumb result-thumb-gated" data-src="' + API + '/preview/' + encodeURIComponent(r.domain) +
+        '" alt="" style="display:none" onerror="this.remove()">';
+    }
+
+    var faviconHtml = "";
+    if (r.domain && !gated){
+      faviconHtml = '<img class="result-favicon" src="/favicons/' + faviconFilename(r.domain) +
+        '" alt="" loading="lazy" onerror="this.remove()">';
+    }
+
+    var mirrorsHtml = "";
+    if (r.mirrors && r.mirrors.length){
+      // Same real content mirrored on other .onion addresses - shown as
+      // a footnote on the canonical result rather than as separate
+      // cards, and gated together with the main address so a Dangerous
+      // result's mirrors aren't visible before "Show address" either.
+      mirrorsHtml = '<div class="result-mirrors">+ ' + r.mirrors.length +
+        ' mirror' + (r.mirrors.length === 1 ? '' : 's') + ': ' +
+        r.mirrors.map(function(m){
+          return '<a href="' + escapeHtml(m.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(m.domain) + '</a>';
+        }).join(', ') + '</div>';
+    }
+    if (r.preview_description){
+      mirrorsHtml += '<div class="result-preview-desc">' + escapeHtml(r.preview_description) + '</div>';
+    }
+
+    var urlHtml;
+    if (gated){
+      urlHtml =
+        '<div class="reveal-gate">Rated ' + label + ' — address and preview hidden by default.' +
+        '<button type="button" class="reveal-btn">Show address</button></div>' +
+        '<div class="result-url" style="display:none">' +
+          '<a href="' + escapeHtml(r.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(r.url) + '</a>' + seenHtml + mirrorsHtml +
+        '</div>';
+    } else {
+      urlHtml = '<div class="result-url"><a href="' + escapeHtml(r.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(r.url) + '</a>' + seenHtml + mirrorsHtml + '</div>';
+    }
+
+    card.innerHTML =
+      '<div class="result-layout">' + thumbHtml +
+      '<div class="result-body">' +
+      '<div class="result-head">' + faviconHtml + '<h3 class="result-title">' + title + '</h3>' + badges + '</div>' +
+      urlHtml +
+      '<div class="result-snippet">' + (snippet || '<span style="color:var(--ink-faint)">no excerpt available</span>') + '</div>' +
+      '<button type="button" class="summarize-btn">Summarize (local AI)</button>' +
+      '<div class="summarize-result" style="display:none"></div>' +
+      '</div></div>';
+
+    var revealBtn = card.querySelector(".reveal-btn");
+    if (revealBtn){
+      revealBtn.addEventListener("click", function(){
+        card.querySelector(".reveal-gate").style.display = "none";
+        card.querySelector(".result-url").style.display = "block";
+        var gatedThumb = card.querySelector(".result-thumb-gated");
+        if (gatedThumb){
+          gatedThumb.src = gatedThumb.dataset.src;
+          gatedThumb.style.display = "";
+        }
+      });
+    }
+
+    var sumBtn = card.querySelector(".summarize-btn");
+    var sumResult = card.querySelector(".summarize-result");
+    sumBtn.addEventListener("click", function(){
+      sumBtn.disabled = true;
+      sumBtn.textContent = "Summarizing\u2026 (local model, can take up to a minute)";
+      sumResult.style.display = "block";
+      sumResult.textContent = "";
+      fetch(API + "/tools/summarize", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({url: r.url})
+      }).then(function(resp){ return resp.json(); }).then(function(data){
+        if (data.error){
+          sumBtn.disabled = false;
+          sumBtn.textContent = "Summarize (local AI)";
+          sumResult.textContent = data.error;
+        } else {
+          sumBtn.style.display = "none";
+          sumResult.textContent = data.summary;
+        }
+      }).catch(function(){
+        sumBtn.disabled = false;
+        sumBtn.textContent = "Summarize (local AI)";
+        sumResult.textContent = "Summarizer is temporarily unavailable.";
+      });
+    });
+
+    return card;
+  }
+
+  function runEntitySearch(entityType, q){
+    if (!q){
+      resultsEl.innerHTML = "";
+      statusEl.textContent = "";
+      return;
+    }
+    statusEl.textContent = "Searching…";
+    resultsEl.innerHTML = "";
+    var eurl = API + "/entities/search?type=" + encodeURIComponent(entityType) + "&value=" + encodeURIComponent(q) + "&limit=25";
+    fetch(eurl).then(function(r){ return r.json(); }).then(function(data){
+      if (data.error){
+        statusEl.textContent = data.error;
+        return;
+      }
+      if (entityType === "email"){
+        statusEl.textContent = data.found
+          ? "Found in crawled leak data — first seen " + (timeAgo(data.first_seen_at) || "a while ago") + ", " + data.sighting_count + " sighting(s)."
+          : "No match found in crawled data.";
+        resultsEl.innerHTML = "";
+        return;
+      }
+      statusEl.textContent = data.total + " page" + (data.total === 1 ? "" : "s") + " mention this " + entityType.toUpperCase() + " value";
+      if (data.results.length === 0){
+        resultsEl.innerHTML = '<div class="empty">No matches for that value in the crawled index.</div>';
+        return;
+      }
+      data.results.forEach(function(r){
+        resultsEl.appendChild(resultCard(r));
+      });
+    }).catch(function(){
+      statusEl.textContent = "Search is temporarily unavailable.";
+    });
+  }
+
+  function runSearch(){
+    var q = input.value.trim();
+    var entityType = entityTypeEl ? entityTypeEl.value : "";
+    var isSemantic = entityType === "semantic";
+    state.q = q;
+
+    if (entityType && !isSemantic){
+      runEntitySearch(entityType, q);
+      return;
+    }
+
+    if (!q && !state.category){
+      resultsEl.innerHTML = '<div class="empty start-prompt">Type a search term above, or pick a category from the left to start browsing.</div>';
+      statusEl.textContent = "";
+      return;
+    }
+    if (isSemantic && !q){
+      resultsEl.innerHTML = "";
+      statusEl.textContent = "Enter a term to find conceptually similar pages.";
+      return;
+    }
+    statusEl.textContent = isSemantic ? "Finding similar pages…" : (q ? "Searching…" : "Browsing…");
+    resultsEl.innerHTML = "";
+
+    var url = API + "/search?limit=25";
+    if (q) url += "&q=" + encodeURIComponent(q);
+    if (state.category) url += "&category=" + encodeURIComponent(state.category);
+    if (isSemantic) url += "&semantic=true";
+
+    fetch(url, {credentials: "same-origin"}).then(function(r){
+      return r.json().then(function(data){ return {status: r.status, data: data}; });
+    }).then(function(res){
+      var data = res.data;
+      if (res.status === 429){
+        statusEl.textContent = data.detail || "Daily search limit reached. Try again tomorrow.";
+        resultsEl.innerHTML = '<div class="empty">' + (data.detail || "You've hit the free-tier search limit for today.") + '</div>';
+        return;
+      }
+      if (data.error){
+        statusEl.textContent = data.error;
+        return;
+      }
+      statusEl.textContent = data.total + " result" + (data.total === 1 ? "" : "s") + (q ? "" : " in this category");
+      if (data.results.length === 0){
+        resultsEl.innerHTML = '<div class="empty">No matches. Try a different term or clear the category filter.</div>';
+        return;
+      }
+      data.results.forEach(function(r){
+        resultsEl.appendChild(resultCard(r));
+      });
+    }).catch(function(){
+      statusEl.textContent = "Search is temporarily unavailable.";
+    });
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    runSearch();
+  });
+
+  if (entityTypeEl){
+    entityTypeEl.addEventListener("change", function(){
+      if (input.value.trim()) runSearch();
+    });
+  }
+
+  // --- Ransomware Activity tab ---
+  var ransomwareState = { group: null, loaded: false };
+  var groupChipsEl = document.getElementById("group-chips");
+  var groupInfoEl = document.getElementById("group-info");
+  var ransomwareStatusEl = document.getElementById("ransomware-status");
+  var ransomwareListEl = document.getElementById("ransomware-list");
+
+  function victimTimeAgo(iso){ return timeAgo(iso) || ""; }
+
+  function renderGroupChips(groups){
+    groupChipsEl.innerHTML = "";
+    var allChip = document.createElement("span");
+    allChip.className = "chip" + (ransomwareState.group ? "" : " active");
+    allChip.textContent = "all groups";
+    allChip.addEventListener("click", function(){
+      ransomwareState.group = null;
+      loadRansomware();
+    });
+    groupChipsEl.appendChild(allChip);
+
+    groups.slice(0, 12).forEach(function(g){
+      var chip = document.createElement("span");
+      chip.className = "chip" + (ransomwareState.group === g.group_name ? " active" : "");
+      chip.textContent = g.group_name + " (" + g.victim_count + ")";
+      chip.addEventListener("click", function(){
+        ransomwareState.group = (ransomwareState.group === g.group_name) ? null : g.group_name;
+        loadRansomware();
+      });
+      groupChipsEl.appendChild(chip);
+    });
+  }
+
+  function loadGroupInfo(group){
+    if (!group){
+      groupInfoEl.innerHTML = "";
+      return;
+    }
+    groupInfoEl.innerHTML = '<div class="group-info-card"><span class="group-info-loading">Checking known mirrors for ' + escapeHtml(group) + '…</span></div>';
+    fetch(API + "/ransomware/group-info?group=" + encodeURIComponent(group)).then(function(r){ return r.json(); }).then(function(data){
+      if (group !== ransomwareState.group) return; // a newer selection has since superseded this response
+      if (!data.mirrors || data.mirrors.length === 0){
+        groupInfoEl.innerHTML = "";
+        return;
+      }
+      var mirrors = data.mirrors.slice(0, 6);
+      var rows = mirrors.map(function(m, idx){
+        var badges = '<span class="badge ' + (m.available ? 'good' : 'neutral') + '">' + (m.available ? "Up" : "Down") + '</span>';
+        if (m.has_chat) badges += '<span class="badge category">Chat</span>';
+        if (m.has_admin_panel) badges += '<span class="badge category">Admin panel</span>';
+        if (m.has_file_share) badges += '<span class="badge category">File share</span>';
+        // RansomLook returns "YYYY-MM-DD HH:MM:SS.ffffff" (UTC, no timezone
+        // marker) - "T" + "Z" so every browser's Date parser reads it as
+        // UTC rather than silently treating the space-separated form as
+        // local time, which would skew "time ago" by the visitor's offset.
+        var seen = timeAgo(m.last_scraped_at ? m.last_scraped_at.replace(" ", "T") + "Z" : null);
+        var previewBtn = m.has_preview
+          ? '<button type="button" class="mirror-preview-btn" data-mirror-idx="' + idx + '">Show preview</button>'
+          : "";
+        return '<div class="group-info-row"><span class="mono group-info-fqdn">' + escapeHtml(m.fqdn) + '</span>' + badges +
+          (seen ? '<span class="last-seen">last scraped ' + seen + '</span>' : '') + previewBtn +
+          '<img class="mirror-preview-img" data-mirror-img="' + idx + '" style="display:none" alt="" onerror="this.remove()"></div>';
+      }).join("");
+      var card = document.createElement("div");
+      card.className = "group-info-card";
+      card.innerHTML =
+        '<div class="group-info-head">Known mirrors for ' + escapeHtml(group) +
+        ' <span class="group-info-source">via RansomLook</span></div>' + rows;
+      card.querySelectorAll("[data-mirror-idx]").forEach(function(btn){
+        btn.addEventListener("click", function(){
+          var idx = btn.getAttribute("data-mirror-idx");
+          var img = card.querySelector('[data-mirror-img="' + idx + '"]');
+          var fqdn = mirrors[Number(idx)].fqdn;
+          img.src = API + "/ransomware/mirror-preview/" + encodeURIComponent(fqdn);
+          img.style.display = "";
+          btn.remove();
+        });
+      });
+      groupInfoEl.innerHTML = "";
+      groupInfoEl.appendChild(card);
+    }).catch(function(){
+      if (group === ransomwareState.group) groupInfoEl.innerHTML = "";
+    });
+  }
+
+  function loadRansomware(){
+    ransomwareStatusEl.textContent = "Loading…";
+    ransomwareListEl.innerHTML = "";
+    loadGroupInfo(ransomwareState.group);
+    var url = API + "/ransomware/victims?limit=50";
+    if (ransomwareState.group) url += "&group=" + encodeURIComponent(ransomwareState.group);
+
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      renderGroupChips(data.groups || []);
+      ransomwareStatusEl.textContent = data.total + " victim" + (data.total === 1 ? "" : "s") + " tracked" +
+        (ransomwareState.group ? " for " + ransomwareState.group : "");
+      if (!data.victims || data.victims.length === 0){
+        ransomwareListEl.innerHTML = '<div class="empty">No victim records yet.</div>';
+        return;
+      }
+      data.victims.forEach(function(v){
+        var row = document.createElement("div");
+        row.className = "victim-card";
+        var when = victimTimeAgo(v.discovered_at);
+
+        var thumbHtml = v.has_screenshot
+          ? '<img class="victim-thumb" src="/ransomware-screens/' + v.id + '.png" alt="" loading="lazy" onerror="this.remove()">'
+          : '<div class="victim-thumb-placeholder">No screenshot captured</div>';
+
+        var descHtml = v.description
+          ? '<p class="victim-desc">' + escapeHtml(v.description.slice(0, 220)) + (v.description.length > 220 ? "…" : "") + '</p>'
+          : "";
+
+        var linksHtml = "";
+        if (v.link) linksHtml += '<a class="victim-link" href="' + escapeHtml(v.link) + '" target="_blank" rel="noopener noreferrer">View group on RansomLook →</a>';
+        if (v.magnet) linksHtml += '<span class="victim-magnet" title="A torrent magnet link to the leaked data was published">⛁ magnet available</span>';
+
+        row.innerHTML =
+          thumbHtml +
+          '<div class="victim-body">' +
+          '<div class="victim-head">' +
+          '<span class="group">' + escapeHtml(v.group_name) + '</span>' +
+          '<span class="name">' + escapeHtml(v.victim_name) + '</span>' +
+          '<span class="when">' + when + '</span>' +
+          '</div>' +
+          descHtml +
+          (linksHtml ? '<div class="victim-links">' + linksHtml + '</div>' : "") +
+          '</div>';
+        ransomwareListEl.appendChild(row);
+      });
+    }).catch(function(){
+      ransomwareStatusEl.textContent = "Ransomware feed is temporarily unavailable.";
+    });
+  }
+
+  // --- Marketplace Trends tab ---
+  var marketplaceStatusEl = document.getElementById("marketplace-status");
+  var marketplaceListEl = document.getElementById("marketplace-list");
+  var marketplaceLoaded = false;
+
+  function loadMarketplaceTrends(){
+    marketplaceStatusEl.textContent = "Loading…";
+    marketplaceListEl.innerHTML = "";
+    fetch(API + "/marketplace/trends").then(function(r){ return r.json(); }).then(function(data){
+      if (!data.trends || data.trends.length === 0){
+        marketplaceStatusEl.textContent = "";
+        marketplaceListEl.innerHTML = '<div class="empty">No price data extracted yet — this fills in as marketplace pages get crawled.</div>';
+        return;
+      }
+      marketplaceStatusEl.textContent = data.count + " domain/currency price series";
+      var table = document.createElement("div");
+      table.className = "trend-wrap";
+      var rows = data.trends.map(function(t){
+        return "<tr><td class=\"domain\">" + escapeHtml(t.domain) + "</td>" +
+          "<td>" + escapeHtml(t.currency) + "</td>" +
+          "<td>" + t.count + "</td>" +
+          "<td>" + t.avg_price.toFixed(2) + "</td>" +
+          "<td>" + t.min_price.toFixed(2) + "</td>" +
+          "<td>" + t.max_price.toFixed(2) + "</td></tr>";
+      }).join("");
+      table.innerHTML =
+        '<table class="trend-table"><thead><tr>' +
+        '<th>Domain</th><th>Currency</th><th>Mentions</th><th>Avg</th><th>Min</th><th>Max</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>';
+      marketplaceListEl.appendChild(table);
+    }).catch(function(){
+      marketplaceStatusEl.textContent = "Marketplace trends are temporarily unavailable.";
+    });
+  }
+
+  // --- Tools tab ---
+  var breachEmailInput = document.getElementById("breach-email");
+  var breachResultEl = document.getElementById("breach-result");
+  document.getElementById("breach-check-btn").addEventListener("click", function(){
+    var email = breachEmailInput.value.trim();
+    if (!email || email.indexOf("@") === -1){
+      breachResultEl.innerHTML = '<div class="tool-note neutral">Enter a valid email address.</div>';
+      return;
+    }
+    breachResultEl.innerHTML = '<div class="tool-note neutral">Checking…</div>';
+    fetch(API + "/tools/check-breach", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({email: email})
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if (data.error){
+        breachResultEl.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+        return;
+      }
+      if (data.found){
+        breachResultEl.innerHTML = '<div class="tool-note bad">This email appears in data crawled from ' +
+          data.sighting_count + ' page' + (data.sighting_count === 1 ? '' : 's') + '. First seen ' +
+          (timeAgo(data.first_seen_at) || 'recently') + '.</div>';
+      } else {
+        breachResultEl.innerHTML = '<div class="tool-note good">No exposure found in what has been indexed. This only covers what this platform has crawled, not every known breach.</div>';
+      }
+    }).catch(function(){
+      breachResultEl.innerHTML = '<div class="tool-note neutral">Check is temporarily unavailable.</div>';
+    });
+  });
+
+  var scrubResultEl = document.getElementById("scrub-result");
+  document.getElementById("scrub-btn").addEventListener("click", function(){
+    var fileInput = document.getElementById("scrub-file");
+    var file = fileInput.files[0];
+    if (!file){
+      scrubResultEl.innerHTML = '<div class="tool-note neutral">Choose an image first.</div>';
+      return;
+    }
+    scrubResultEl.innerHTML = '<div class="tool-note neutral">Scrubbing…</div>';
+    var formData = new FormData();
+    formData.append("file", file);
+    fetch(API + "/tools/scrub-image", { method: "POST", body: formData }).then(function(r){
+      if (!r.ok) throw new Error("bad response");
+      var hadMetadata = r.headers.get("X-Metadata-Found") === "true";
+      return r.blob().then(function(blob){ return {blob: blob, hadMetadata: hadMetadata}; });
+    }).then(function(result){
+      var url = URL.createObjectURL(result.blob);
+      var note = result.hadMetadata
+        ? '<div class="tool-note bad">Metadata was found and has been removed.</div>'
+        : '<div class="tool-note good">No metadata was found in this file.</div>';
+      scrubResultEl.innerHTML = note + '<p style="margin-top:0.6rem"><a href="' + url + '" download="scrubbed-' + escapeHtml(file.name) + '">Download cleaned file</a></p>';
+    }).catch(function(){
+      scrubResultEl.innerHTML = '<div class="tool-note neutral">Scrub failed — is this a valid image?</div>';
+    });
+  });
+
+  var torResultEl = document.getElementById("tor-result");
+  document.getElementById("tor-check-btn").addEventListener("click", function(){
+    var checks = [];
+    checks.push({name: "No browser plugins reported", pass: (navigator.plugins || []).length === 0});
+    checks.push({name: "Timezone reported as UTC", pass: new Date().getTimezoneOffset() === 0});
+    checks.push({name: "Single language reported", pass: (navigator.languages || [navigator.language]).length <= 1});
+    checks.push({name: "Window size not unusually resized", pass: Math.abs(screen.width - window.outerWidth) < 100});
+    checks.push({name: "Hardware concurrency not exposing a high core count", pass: (navigator.hardwareConcurrency || 0) <= 4});
+
+    var passCount = checks.filter(function(c){ return c.pass; }).length;
+    var summary = passCount === checks.length
+      ? '<div class="tool-note good">All ' + checks.length + ' checks passed.</div>'
+      : '<div class="tool-note bad">' + (checks.length - passCount) + ' of ' + checks.length + ' checks flagged something worth reviewing.</div>';
+
+    var list = '<ul class="check-list">' + checks.map(function(c){
+      return '<li><span class="mark ' + (c.pass ? "pass" : "fail") + '">' + (c.pass ? "✓" : "✗") + '</span> ' + escapeHtml(c.name) + '</li>';
+    }).join("") + '</ul>';
+
+    torResultEl.innerHTML = summary + list;
+  });
+
+  document.getElementById("digest-btn").addEventListener("click", function(){
+    var email = document.getElementById("digest-email").value.trim();
+    var resultEl = document.getElementById("digest-result");
+    if (!email){
+      resultEl.innerHTML = '<div class="tool-note neutral">Enter an email address.</div>';
+      return;
+    }
+    resultEl.innerHTML = '<div class="tool-note neutral">Subscribing…</div>';
+    fetch(API + "/digest/subscribe", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({email: email})
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if (data.error){
+        resultEl.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+        return;
+      }
+      resultEl.innerHTML = '<div class="tool-note good">Subscribed. Keep this unsubscribe token to stop it later: <code>' + escapeHtml(data.unsubscribe_token) + '</code></div>';
+    }).catch(function(){
+      resultEl.innerHTML = '<div class="tool-note neutral">Something went wrong. Try again shortly.</div>';
+    });
+  });
+
+  document.getElementById("watch-btn").addEventListener("click", function(){
+    var keyword = document.getElementById("watch-keyword").value.trim();
+    var webhook = document.getElementById("watch-webhook").value.trim();
+    var resultEl = document.getElementById("watch-result");
+    if (!keyword || !webhook){
+      resultEl.innerHTML = '<div class="tool-note neutral">Fill in both fields.</div>';
+      return;
+    }
+    resultEl.innerHTML = '<div class="tool-note neutral">Registering…</div>';
+    fetch(API + "/watchlist", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({keyword: keyword, webhook_url: webhook})
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if (data.error){
+        resultEl.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+        return;
+      }
+      var retroNote = data.retro_hunt_matches
+        ? (" Found " + data.retro_hunt_matches + " match" + (data.retro_hunt_matches === 1 ? "" : "es") + " already in past victims - webhook fired for " + (data.retro_hunt_matches === 1 ? "it" : "each") + ".")
+        : " No matches in past victims yet - you'll be notified going forward.";
+      resultEl.innerHTML = '<div class="tool-note good">Watching "' + escapeHtml(data.keyword) + '".' + retroNote +
+        ' Keep this unsubscribe token to stop it later: <code>' + escapeHtml(data.unsubscribe_token) + '</code></div>';
+    }).catch(function(){
+      resultEl.innerHTML = '<div class="tool-note neutral">Registration failed. Try again shortly.</div>';
+    });
+  });
+
+  document.getElementById("report-btn").addEventListener("click", function(){
+    var host = document.getElementById("report-host").value.trim();
+    var reason = document.getElementById("report-reason").value.trim();
+    var resultEl = document.getElementById("report-result");
+    if (!host || !reason){
+      resultEl.innerHTML = '<div class="tool-note neutral">Fill in both fields.</div>';
+      return;
+    }
+    resultEl.innerHTML = '<div class="tool-note neutral">Submitting…</div>';
+    fetch(API + "/reports", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({host: host, reason: reason})
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if (data.error){
+        resultEl.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+        return;
+      }
+      resultEl.innerHTML = '<div class="tool-note good">Report submitted for review. Thank you.</div>';
+      document.getElementById("report-host").value = "";
+      document.getElementById("report-reason").value = "";
+    }).catch(function(){
+      resultEl.innerHTML = '<div class="tool-note neutral">Submission failed. Try again shortly.</div>';
+    });
+  });
+
+  document.getElementById("verify-btn").addEventListener("click", function(){
+    var host = document.getElementById("verify-host").value.trim();
+    var resultEl = document.getElementById("verify-result");
+    if (!host || host.indexOf(".onion") === -1){
+      resultEl.innerHTML = '<div class="tool-note neutral">Enter a valid .onion address.</div>';
+      return;
+    }
+    resultEl.innerHTML = '<div class="tool-note neutral">Starting…</div>';
+    fetch(API + "/verify/claim", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({host: host})
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if (data.error){
+        resultEl.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+        return;
+      }
+      resultEl.innerHTML = '<div class="tool-note good">' + escapeHtml(data.instructions) + '</div>';
+    }).catch(function(){
+      resultEl.innerHTML = '<div class="tool-note neutral">Could not start verification. Try again shortly.</div>';
+    });
+  });
+
+  function severityFromRating(rating){
+    return (rating && rating.severity) || "neutral";
+  }
+
+  function renderUrlCheckResult(el, data){
+    if (data.error){
+      el.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+      return;
+    }
+    if (data.source === "crawled_index"){
+      var sev = severityFromRating(data.safety_rating);
+      el.innerHTML = '<div class="tool-note ' + sev + '">' + escapeHtml(data.host) + ' — rated ' +
+        escapeHtml(data.safety_rating.label) + ' from ' + data.page_count + ' crawled page' +
+        (data.page_count === 1 ? '' : 's') + '.</div>';
+      return;
+    }
+    if (data.reachable === false){
+      el.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.host || "") + ' could not be reached: ' +
+        escapeHtml(data.error || "unknown error") + '</div>';
+      return;
+    }
+    var sevMap = {"phishing-clone": "bad", "scam-shop": "bad", "legitimate": "good", "other": "neutral"};
+    var sev2 = sevMap[data.category] || "neutral";
+    el.innerHTML = '<div class="tool-note ' + sev2 + '">' + escapeHtml(data.host) + ' — live check: ' +
+      escapeHtml(data.category) + ' (confidence ' + data.confidence + '). Not yet in this platform\'s crawl index.</div>';
+  }
+
+  document.getElementById("checkurl-btn").addEventListener("click", function(){
+    var url = document.getElementById("checkurl-input").value.trim();
+    var el = document.getElementById("checkurl-result");
+    if (!url){ el.innerHTML = '<div class="tool-note neutral">Enter a URL.</div>'; return; }
+    el.innerHTML = '<div class="tool-note neutral">Checking…</div>';
+    fetch(API + "/tools/check-url", {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({url: url})
+    }).then(function(r){ return r.json(); }).then(function(data){ renderUrlCheckResult(el, data); })
+      .catch(function(){ el.innerHTML = '<div class="tool-note neutral">Check failed. Try again shortly.</div>'; });
+  });
+
+  document.getElementById("checkshop-btn").addEventListener("click", function(){
+    var url = document.getElementById("checkshop-input").value.trim();
+    var el = document.getElementById("checkshop-result");
+    if (!url){ el.innerHTML = '<div class="tool-note neutral">Enter a shop URL.</div>'; return; }
+    el.innerHTML = '<div class="tool-note neutral">Checking…</div>';
+    fetch(API + "/tools/check-url", {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({url: url})
+    }).then(function(r){ return r.json(); }).then(function(data){ renderUrlCheckResult(el, data); })
+      .catch(function(){ el.innerHTML = '<div class="tool-note neutral">Check failed. Try again shortly.</div>'; });
+  });
+
+  function renderScamTextResult(el, data){
+    if (data.error){
+      el.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+      return;
+    }
+    if (data.category === "legitimate"){
+      el.innerHTML = '<div class="tool-note good">No strong scam pattern detected.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="tool-note bad">Matches a <b>' + escapeHtml(data.category) +
+      '</b> pattern (confidence ' + data.confidence + ').</div>';
+  }
+
+  document.getElementById("checkscam-btn").addEventListener("click", function(){
+    var text = document.getElementById("checkscam-input").value.trim();
+    var el = document.getElementById("checkscam-result");
+    if (!text){ el.innerHTML = '<div class="tool-note neutral">Paste a message first.</div>'; return; }
+    el.innerHTML = '<div class="tool-note neutral">Checking…</div>';
+    fetch(API + "/tools/check-scam-text", {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({text: text})
+    }).then(function(r){ return r.json(); }).then(function(data){ renderScamTextResult(el, data); })
+      .catch(function(){ el.innerHTML = '<div class="tool-note neutral">Check failed. Try again shortly.</div>'; });
+  });
+
+  document.getElementById("checkjob-btn").addEventListener("click", function(){
+    var text = document.getElementById("checkjob-input").value.trim();
+    var el = document.getElementById("checkjob-result");
+    if (!text){ el.innerHTML = '<div class="tool-note neutral">Paste a posting first.</div>'; return; }
+    el.innerHTML = '<div class="tool-note neutral">Checking…</div>';
+    fetch(API + "/tools/check-scam-text", {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({text: text})
+    }).then(function(r){ return r.json(); }).then(function(data){ renderScamTextResult(el, data); })
+      .catch(function(){ el.innerHTML = '<div class="tool-note neutral">Check failed. Try again shortly.</div>'; });
+  });
+
+  document.getElementById("checkemail-btn").addEventListener("click", function(){
+    var text = document.getElementById("checkemail-input").value.trim();
+    var el = document.getElementById("checkemail-result");
+    if (!text){ el.innerHTML = '<div class="tool-note neutral">Paste an email first.</div>'; return; }
+    el.innerHTML = '<div class="tool-note neutral">Analyzing…</div>';
+    fetch(API + "/tools/check-email", {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({text: text})
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if (data.error){
+        el.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+        return;
+      }
+      var verdictHtml;
+      if (data.verdict.category === "legitimate"){
+        verdictHtml = '<div class="tool-note good">No strong scam pattern detected in the message content.</div>';
+      } else {
+        verdictHtml = '<div class="tool-note bad">Matches a <b>' + escapeHtml(data.verdict.category) +
+          '</b> pattern (confidence ' + data.verdict.confidence + ').</div>';
+      }
+      var linksHtml = "";
+      if (data.links_checked && data.links_checked.length){
+        linksHtml = '<ul class="check-list">' + data.links_checked.map(function(l){
+          var label = l.error ? "could not check" : (l.source === "crawled_index" ? l.safety_rating.label : (l.category || "unknown"));
+          var pass = !l.error && (l.source === "crawled_index" ? severityFromRating(l.safety_rating) === "good" : l.category === "legitimate");
+          return '<li><span class="mark ' + (pass ? "pass" : "fail") + '">' + (pass ? "✓" : "✗") + '</span> ' +
+            escapeHtml(l.url) + ' — ' + escapeHtml(label) + '</li>';
+        }).join("") + '</ul>';
+      }
+      el.innerHTML = verdictHtml + linksHtml;
+    }).catch(function(){
+      el.innerHTML = '<div class="tool-note neutral">Analysis failed. Try again shortly.</div>';
+    });
+  });
+
+  document.getElementById("checkqr-btn").addEventListener("click", function(){
+    var fileInput = document.getElementById("checkqr-file");
+    var file = fileInput.files[0];
+    var el = document.getElementById("checkqr-result");
+    if (!file){ el.innerHTML = '<div class="tool-note neutral">Choose an image first.</div>'; return; }
+    el.innerHTML = '<div class="tool-note neutral">Reading…</div>';
+    var formData = new FormData();
+    formData.append("file", file);
+    fetch(API + "/tools/check-qr", { method: "POST", body: formData })
+      .then(function(r){ return r.json(); }).then(function(data){
+        if (data.error){
+          el.innerHTML = '<div class="tool-note neutral">' + escapeHtml(data.error) + '</div>';
+          return;
+        }
+        if (!data.is_url){
+          el.innerHTML = '<div class="tool-note neutral">Decoded (not a URL): ' + escapeHtml(data.decoded) + '</div>';
+          return;
+        }
+        var pre = '<div class="tool-note neutral">Decoded: ' + escapeHtml(data.decoded) + '</div>';
+        var resultEl = document.createElement("div");
+        renderUrlCheckResult(resultEl, data.check);
+        el.innerHTML = pre + resultEl.innerHTML;
+      }).catch(function(){
+        el.innerHTML = '<div class="tool-note neutral">Check failed. Try again shortly.</div>';
+      });
+  });
+
+  // --- Tab switching ---
+  var tabButtons = document.querySelectorAll(".tab");
+  var searchControlsEl = document.getElementById("search-controls");
+  var views = {
+    search: document.getElementById("view-search"),
+    ransomware: document.getElementById("view-ransomware"),
+    marketplace: document.getElementById("view-marketplace"),
+    tools: document.getElementById("view-tools"),
+    guide: document.getElementById("view-guide")
+  };
+
+  tabButtons.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var tab = btn.getAttribute("data-tab");
+      tabButtons.forEach(function(b){ b.classList.toggle("active", b === btn); });
+      Object.keys(views).forEach(function(key){
+        views[key].style.display = (key === tab) ? "" : "none";
+      });
+      searchControlsEl.style.display = (tab === "search") ? "" : "none";
+
+      if (tab === "ransomware" && !ransomwareState.loaded){
+        ransomwareState.loaded = true;
+        loadRansomware();
+      } else if (tab === "marketplace" && !marketplaceLoaded){
+        marketplaceLoaded = true;
+        loadMarketplaceTrends();
+      }
+    });
+  });
+
+  renderChips();
+  loadStats();
+  // Reads ?q= from the URL on load so a shared/bookmarked search link
+  // (and the JSON-LD SearchAction target in <head>, which claims exactly
+  // this) actually works, not just describes a capability that doesn't
+  // exist. Falls through to runSearch()'s own start-prompt when absent.
+  var initialQuery = new URLSearchParams(window.location.search).get("q");
+  if (initialQuery) input.value = initialQuery;
+  runSearch();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+opensearch-py==3.2.0
+psycopg==3.3.5
+psycopg-binary==3.3.5
+py3langid>=0.2
+requests>=2.32
+Scrapy==2.18.0
+sentence-transformers>=3.0
+playwright>=1.40
+Pillow>=10.0
+nudenet>=3.0
+rapidocr-onnxruntime>=1.2
+pyzbar>=0.1.9
+cryptography>=42
+holidays>=0.60

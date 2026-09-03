@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily refresh of the AWS CloudFront route bypass
+
+[Timer]
+OnBootSec=2min
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

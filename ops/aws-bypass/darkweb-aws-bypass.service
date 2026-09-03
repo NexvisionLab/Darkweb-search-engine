@@ -1,0 +1,8 @@
+[Unit]
+Description=Bypass VPN for AWS CloudFront IP ranges (fixes Docker/pull PMTUD blackhole)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/darkweb-aws-bypass.sh

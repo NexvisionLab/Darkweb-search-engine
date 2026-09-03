@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+.data/
+venv/
+.venv/
+*.egg-info/
+crawler/seeds_runtime.txt
+web/previews/
+previews_gated/
+web/favicons/
+web/ransomware-screens/
+ransomware_mirrors_gated/
+ai/models/
+*.gguf

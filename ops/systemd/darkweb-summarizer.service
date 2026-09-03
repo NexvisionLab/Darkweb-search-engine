@@ -1,0 +1,14 @@
+[Unit]
+Description=DarkNyx local AI summarizer (llama.cpp / Qwen3.5 4B)
+After=network.target
+
+[Service]
+Type=simple
+User=darknyx
+WorkingDirectory=/opt/darknyx
+ExecStart=/opt/darknyx/ai/.venv/bin/python3 -m llama_cpp.server --model /opt/darknyx/ai/models/Qwen3.5-4B-Q4_K_M.gguf --host 127.0.0.1 --port 8081 --n_ctx 8192 --chat_format qwen
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

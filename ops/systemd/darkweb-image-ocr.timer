@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically OCR/QR-scan images found on crawled pages
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=2h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

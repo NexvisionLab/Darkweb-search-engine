@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh seeds, crawl, and check domain liveness
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=darknyx
+ExecStart=/usr/local/sbin/darkweb-pipeline.sh
+TimeoutStartSec=7200
