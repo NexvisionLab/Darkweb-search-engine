@@ -211,6 +211,17 @@
   .tools-group-head h2{ font-family:"Source Serif 4",Georgia,serif; font-size:1.3rem; font-weight:600; margin:0; }
   .tools-group-head span{ color:var(--ink-faint); font-size:0.88rem; }
   .tools-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:1rem; }
+  .tools-two-col{
+    display:grid; column-gap:2rem; row-gap:1rem;
+    grid-template-columns:1fr 1fr;
+    grid-template-areas: "head-l head-r" "row1-l row1-r" "row2-l row2-r";
+  }
+  @media (max-width:700px){
+    .tools-two-col{
+      grid-template-columns:1fr;
+      grid-template-areas: "head-l" "row1-l" "row2-l" "head-r" "row1-r" "row2-r";
+    }
+  }
   .tool-card{ display:flex; flex-direction:column; border:1px solid var(--line); background:var(--paper-raised); border-radius:10px; padding:1.3rem 1.4rem; margin-bottom:0; box-shadow:var(--shadow); }
   .tool-card.featured{ grid-column:1 / -1; border-color:var(--line-strong); }
   .tool-card .tool-row{ margin-top:auto; }
@@ -556,72 +567,61 @@
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px,1fr)); gap:2rem;">
+        <div class="tools-two-col">
 
-          <div class="tools-group" style="margin-bottom:0">
-            <div class="tools-group-head"><h2>Stay alerted</h2></div>
-            <div class="tools-grid" style="grid-template-columns:1fr">
+          <div class="tools-group-head" style="grid-area:head-l; margin-bottom:0"><h2>Stay alerted</h2></div>
+          <div class="tools-group-head" style="grid-area:head-r; margin-bottom:0"><h2>Site operators</h2></div>
 
-              <div class="tool-card">
-                <div class="tool-card-head">
-                  <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></div>
-                  <div class="tool-card-head-text"><h3>Watchlist alerts</h3><p class="tool-desc">Get a webhook call the moment an organization or keyword is named on a ransomware leak site. Accepts a plain word or a regex pattern - matching immediately runs against past victims too, not just new ones. No account needed.</p></div>
-                </div>
-                <div class="tool-row">
-                  <input type="text" id="watch-keyword" placeholder="Organization or keyword" autocomplete="off">
-                  <input type="text" id="watch-webhook" placeholder="https://your-webhook-url" autocomplete="off">
-                  <button type="button" id="watch-btn">Watch</button>
-                </div>
-                <div class="tool-result" id="watch-result"></div>
-              </div>
-
-              <div class="tool-card">
-                <div class="tool-card-head">
-                  <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg></div>
-                  <div class="tool-card-head-text"><h3>Weekly digest</h3><p class="tool-desc">A once-a-week email — new ransomware victims and newly flagged Suspicious/Dangerous sites from the last 7 days. One click to unsubscribe any time.</p></div>
-                </div>
-                <div class="tool-row">
-                  <input type="email" id="digest-email" placeholder="you@example.com" autocomplete="off">
-                  <button type="button" id="digest-btn">Subscribe</button>
-                </div>
-                <div class="tool-result" id="digest-result"></div>
-              </div>
-
+          <div class="tool-card" style="grid-area:row1-l">
+            <div class="tool-card-head">
+              <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></div>
+              <div class="tool-card-head-text"><h3>Watchlist alerts</h3><p class="tool-desc">Get a webhook call the moment an organization or keyword is named on a ransomware leak site. Accepts a plain word or a regex pattern - matching immediately runs against past victims too, not just new ones. No account needed.</p></div>
             </div>
+            <div class="tool-row">
+              <input type="text" id="watch-keyword" placeholder="Organization or keyword" autocomplete="off">
+              <input type="text" id="watch-webhook" placeholder="https://your-webhook-url" autocomplete="off">
+              <button type="button" id="watch-btn">Watch</button>
+            </div>
+            <div class="tool-result" id="watch-result"></div>
           </div>
 
-          <div class="tools-group" style="margin-bottom:0">
-            <div class="tools-group-head"><h2>Site operators</h2></div>
-            <div class="tools-grid" style="grid-template-columns:1fr">
-
-              <div class="tool-card">
-                <div class="tool-card-head">
-                  <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V4h12l-1 4 1 4H4"/></svg></div>
-                  <div class="tool-card-head-text"><h3>Report a site</h3><p class="tool-desc">Flag a listed onion address as a scam, phishing clone, or otherwise mislabeled. Reviewed manually before it affects any rating.</p></div>
-                </div>
-                <div class="tool-row">
-                  <input type="text" id="report-host" placeholder="somesite.onion" autocomplete="off">
-                </div>
-                <div class="tool-row" style="margin-top:0.6rem">
-                  <input type="text" id="report-reason" placeholder="What's wrong with it?" autocomplete="off">
-                  <button type="button" id="report-btn">Submit</button>
-                </div>
-                <div class="tool-result" id="report-result"></div>
-              </div>
-
-              <div class="tool-card">
-                <div class="tool-card-head">
-                  <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
-                  <div class="tool-card-head-text"><h3>Verify site ownership</h3><p class="tool-desc">Operate a legitimate .onion service? Claim it to get a Verified rating instead of Unrated once we confirm you control it.</p></div>
-                </div>
-                <div class="tool-row">
-                  <input type="text" id="verify-host" placeholder="yoursite.onion" autocomplete="off">
-                  <button type="button" id="verify-btn">Start verification</button>
-                </div>
-                <div class="tool-result" id="verify-result"></div>
-              </div>
-
+          <div class="tool-card" style="grid-area:row1-r">
+            <div class="tool-card-head">
+              <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V4h12l-1 4 1 4H4"/></svg></div>
+              <div class="tool-card-head-text"><h3>Report a site</h3><p class="tool-desc">Flag a listed onion address as a scam, phishing clone, or otherwise mislabeled. Reviewed manually before it affects any rating.</p></div>
             </div>
+            <div class="tool-row">
+              <input type="text" id="report-host" placeholder="somesite.onion" autocomplete="off">
+            </div>
+            <div class="tool-row" style="margin-top:0.6rem">
+              <input type="text" id="report-reason" placeholder="What's wrong with it?" autocomplete="off">
+              <button type="button" id="report-btn">Submit</button>
+            </div>
+            <div class="tool-result" id="report-result"></div>
+          </div>
+
+          <div class="tool-card" style="grid-area:row2-l">
+            <div class="tool-card-head">
+              <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg></div>
+              <div class="tool-card-head-text"><h3>Weekly digest</h3><p class="tool-desc">A once-a-week email — new ransomware victims and newly flagged Suspicious/Dangerous sites from the last 7 days. One click to unsubscribe any time.</p></div>
+            </div>
+            <div class="tool-row">
+              <input type="email" id="digest-email" placeholder="you@example.com" autocomplete="off">
+              <button type="button" id="digest-btn">Subscribe</button>
+            </div>
+            <div class="tool-result" id="digest-result"></div>
+          </div>
+
+          <div class="tool-card" style="grid-area:row2-r">
+            <div class="tool-card-head">
+              <div class="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+              <div class="tool-card-head-text"><h3>Verify site ownership</h3><p class="tool-desc">Operate a legitimate .onion service? Claim it to get a Verified rating instead of Unrated once we confirm you control it.</p></div>
+            </div>
+            <div class="tool-row">
+              <input type="text" id="verify-host" placeholder="yoursite.onion" autocomplete="off">
+              <button type="button" id="verify-btn">Start verification</button>
+            </div>
+            <div class="tool-result" id="verify-result"></div>
           </div>
 
         </div>
