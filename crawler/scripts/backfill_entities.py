@@ -9,7 +9,6 @@ pages_with_entities = 0
 for page_id, domain_id, body_text in pages:
     entities = entity_extract.extract_entities(body_text)
     if entities:
-        db.clear_page_entities(conn, page_id)
         db.insert_page_entities(conn, page_id, domain_id, entities)
         total_entities += len(entities)
         pages_with_entities += 1

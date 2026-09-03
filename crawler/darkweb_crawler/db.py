@@ -481,23 +481,28 @@ def update_domain_preview_description(conn, domain_id, description):
 
 
 def insert_page_entities(conn, page_id, domain_id, entities):
-    if not entities:
-        return
+    """Upserts this crawl's entities for the page, preserving history:
+    every existing row for the page is first marked still_present=false,
+    then each entity found this crawl is inserted (first sighting) or,
+    on a repeat, has last_seen_at/sighting_count bumped and
+    still_present flipped back true. An entity that isn't in this
+    crawl's list stays in the table with still_present=false rather
+    than being deleted, so a value that disappears between crawls is
+    still queryable instead of silently vanishing."""
     with conn.cursor() as cur:
+        cur.execute("UPDATE page_entities SET still_present = false WHERE page_id = %s", (page_id,))
         for e in entities:
             cur.execute(
                 """
                 INSERT INTO page_entities (page_id, domain_id, entity_type, entity_value)
                 VALUES (%s, %s, %s, %s)
-                ON CONFLICT (page_id, entity_type, entity_value) DO NOTHING
+                ON CONFLICT (page_id, entity_type, entity_value) DO UPDATE
+                    SET last_seen_at = now(),
+                        sighting_count = page_entities.sighting_count + 1,
+                        still_present = true
                 """,
                 (page_id, domain_id, e["entity_type"], e["entity_value"]),
             )
-
-
-def clear_page_entities(conn, page_id):
-    with conn.cursor() as cur:
-        cur.execute("DELETE FROM page_entities WHERE page_id = %s", (page_id,))
 
 
 def get_all_pages_with_body(conn):

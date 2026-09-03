@@ -151,8 +151,7 @@ class DBUpdatePipeline:
             db.clear_page_prices(self.conn, item["page_id"])
             db.insert_page_prices(self.conn, item["page_id"], item["domain_id"], item["prices"])
 
-        if item.get("entities"):
-            db.clear_page_entities(self.conn, item["page_id"])
+        if "entities" in item:
             db.insert_page_entities(self.conn, item["page_id"], item["domain_id"], item["entities"])
 
         for email_hash in item.get("email_hashes", []):
