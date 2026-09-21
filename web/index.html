@@ -156,8 +156,8 @@
   .stats-strip{ display:flex; gap:1.8rem; margin-top:1.4rem; font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--ink-faint); }
   .stats-strip b{ color:var(--ink-soft); font-weight:600; }
 
-  .tabs{ display:flex; gap:0.3rem; margin-top:1.6rem; margin-bottom:1.4rem; border-bottom:1px solid var(--line); }
-  .tab{ font:inherit; font-size:0.86rem; font-weight:500; padding:0.55rem 0.9rem; border:none; background:none;
+  .tabs{ display:flex; gap:0.3rem; margin-top:1.6rem; margin-bottom:1.4rem; border-bottom:1px solid var(--line); overflow-x:auto; scrollbar-width:thin; }
+  .tab{ white-space:nowrap; flex-shrink:0; font:inherit; font-size:0.86rem; font-weight:500; padding:0.55rem 0.9rem; border:none; background:none;
     color:var(--ink-faint); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
   .tab.active{ color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
   .tab:hover{ color:var(--ink); }
@@ -195,6 +195,23 @@
   .victim-links{ display:flex; align-items:center; gap:1rem; margin-top:0.6rem; flex-wrap:wrap; }
   .victim-link{ font-size:0.82rem; color:var(--accent-2); text-decoration:none; }
   .victim-link:hover{ text-decoration:underline; }
+  .tg-intro{ color:var(--ink-soft); font-size:0.9rem; max-width:70ch; margin:0 0 0.4rem; }
+  .tg-controls{ display:flex; gap:0.6rem; flex-wrap:wrap; margin:1rem 0 0.2rem; }
+  .tg-controls input{ flex:1; min-width:180px; font:inherit; font-size:0.9rem; padding:0.55rem 0.75rem;
+    border:1px solid var(--line-strong); border-radius:8px; background:var(--paper-raised); color:var(--ink); }
+  .tg-controls button{ font:inherit; font-weight:600; padding:0.55rem 1.1rem; border-radius:8px; border:none;
+    background:var(--accent); color:#fff9f4; cursor:pointer; white-space:nowrap; }
+  .tg-card{ padding:0.9rem 1.2rem; margin-bottom:0.7rem; border:1px solid var(--line); background:var(--paper-raised);
+    border-radius:10px; box-shadow:var(--shadow); }
+  .tg-head{ display:flex; align-items:baseline; gap:0.7rem; flex-wrap:wrap; }
+  .tg-channel{ font-family:"IBM Plex Mono",monospace; font-size:0.76rem; color:var(--accent); font-weight:600; }
+  .tg-when{ font-family:"IBM Plex Mono",monospace; font-size:0.74rem; color:var(--ink-faint); }
+  .tg-older{ font-family:"IBM Plex Mono",monospace; font-size:0.66rem; text-transform:uppercase; letter-spacing:0.03em;
+    color:var(--ink-soft); background:var(--neutral-soft); padding:0.14rem 0.5rem; border-radius:999px; }
+  .tg-snippet{ margin:0.4rem 0 0; font-size:0.92rem; max-width:70ch; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .tg-more{ margin:1rem 0 0; text-align:center; }
+  .tg-note{ font-size:0.8rem; color:var(--ink-faint); max-width:72ch; margin-top:1.6rem; line-height:1.55; }
+  .tg-note a{ color:var(--accent-2); }
   .victim-magnet{ font-family:"IBM Plex Mono",monospace; font-size:0.72rem; color:var(--ink-faint); }
   @media (max-width:760px){ .victim-thumb, .victim-thumb-placeholder{ width:120px; height:80px; } }
   @media (max-width:520px){ .victim-thumb, .victim-thumb-placeholder{ display:none; } }
@@ -401,6 +418,7 @@
       <nav class="tabs" id="tabs">
         <button type="button" class="tab active" data-tab="search">Search</button>
         <button type="button" class="tab" data-tab="ransomware">Ransomware Activity</button>
+        <button type="button" class="tab" data-tab="telegram">Telegram</button>
         <button type="button" class="tab" data-tab="marketplace">Marketplace Trends</button>
         <button type="button" class="tab" data-tab="tools">Tools</button>
         <button type="button" class="tab" data-tab="guide">Safety Guide</button>
@@ -485,6 +503,18 @@
         <div id="group-info"></div>
         <div class="status-line" id="ransomware-status"></div>
         <div id="ransomware-list"></div>
+      </div>
+      <div id="view-telegram" style="display:none">
+        <p class="tg-intro">Recent posts from public Telegram channels run by ransomware and leak groups, as short excerpts. Links are shown by domain only.</p>
+        <form class="tg-controls" id="tg-form">
+          <input type="search" id="tg-q" placeholder="Search these posts…" autocomplete="off" maxlength="200" aria-label="Search Telegram posts">
+          <button type="submit">Search</button>
+        </form>
+        <div class="chips" id="tg-chips"></div>
+        <div class="status-line" id="tg-status" style="margin-top:1rem"></div>
+        <div id="tg-list"></div>
+        <div class="tg-more"><button type="button" class="chip" id="tg-more" style="display:none">Show more</button></div>
+        <p class="tg-note">Posts come from public Telegram channels this platform monitors. Only the last 7 days are shown, or, for a quiet channel, its latest few posts marked “older post”. Excerpts are shortened, links are reduced to their domain, and personal data such as emails and phone numbers is masked. Posts are deleted after 30 days. To ask for a post or channel to be removed, contact <a href="https://nexvisionlab.com/" target="_blank" rel="noopener noreferrer">NexVision Lab</a>. <a href="/portal/">Pro</a> adds watches, alerts, full history and API access.</p>
       </div>
       <div id="view-marketplace" style="display:none">
         <div class="status-line" id="marketplace-status"></div>
@@ -1304,6 +1334,111 @@
     });
   }
 
+  // --- Telegram tab ---
+  var TG_PAGE = 20;
+  var tgState = { channel: null, q: "", offset: 0, loaded: false };
+  var tgChannels = [];
+  var tgStatusEl = document.getElementById("tg-status");
+  var tgListEl = document.getElementById("tg-list");
+  var tgChipsEl = document.getElementById("tg-chips");
+  var tgMoreEl = document.getElementById("tg-more");
+  var tgInputEl = document.getElementById("tg-q");
+
+  function renderTgChips(){
+    tgChipsEl.innerHTML = "";
+    var all = document.createElement("button");
+    all.type = "button";
+    all.className = "chip" + (tgState.channel ? "" : " active");
+    all.textContent = "All channels";
+    all.addEventListener("click", function(){ tgState.channel = null; renderTgChips(); loadTelegram(false); });
+    tgChipsEl.appendChild(all);
+    tgChannels.forEach(function(c){
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (tgState.channel === c.channel ? " active" : "");
+      chip.textContent = "@" + c.channel;
+      chip.addEventListener("click", function(){
+        tgState.channel = (tgState.channel === c.channel) ? null : c.channel;
+        renderTgChips();
+        loadTelegram(false);
+      });
+      tgChipsEl.appendChild(chip);
+    });
+  }
+
+  // Retries twice on a dropped request, and always ends by drawing the chip bar (at least
+  // "All channels") so a network hiccup can never leave it blank.
+  function loadTgChannels(attempt){
+    fetch(API + "/telegram/channels").then(function(r){ return r.json(); }).then(function(data){
+      tgChannels = data.channels || [];
+      renderTgChips();
+    }).catch(function(){
+      if ((attempt || 0) < 2){
+        setTimeout(function(){ loadTgChannels((attempt || 0) + 1); }, 1500);
+      } else {
+        renderTgChips();
+      }
+    });
+  }
+
+  function tgWhen(post){
+    var d = new Date(post.posted_at);
+    if (isNaN(d.getTime())) return "";
+    return post.older ? d.toISOString().slice(0, 10) : (timeAgo(post.posted_at) || "");
+  }
+
+  function loadTelegram(append){
+    if (!append){ tgState.offset = 0; tgListEl.innerHTML = ""; }
+    tgMoreEl.style.display = "none";
+    tgStatusEl.textContent = "Loading…";
+    var url = API + "/telegram/posts?limit=" + TG_PAGE + "&offset=" + tgState.offset;
+    if (tgState.channel) url += "&channel=" + encodeURIComponent(tgState.channel);
+    if (tgState.q) url += "&q=" + encodeURIComponent(tgState.q);
+
+    fetch(url).then(function(r){ return r.json(); }).then(function(data){
+      if (typeof data.total !== "number"){
+        tgStatusEl.textContent = "Telegram posts are temporarily unavailable.";
+        return;
+      }
+      var what = data.total + " post" + (data.total === 1 ? "" : "s") +
+        (tgState.channel ? " in @" + tgState.channel : "") +
+        (tgState.q ? " matching \u201c" + tgState.q + "\u201d" : "");
+      tgStatusEl.textContent = what;
+      if (data.total === 0 && !append){
+        tgListEl.innerHTML = '<div class="empty">' + (tgChannels.length === 0
+          ? "No Telegram channels are published yet."
+          : "No posts match.") + '</div>';
+        return;
+      }
+      data.posts.forEach(function(p){
+        var card = document.createElement("div");
+        card.className = "tg-card";
+        var link = (p.url && p.url.indexOf("https://t.me/") === 0)
+          ? '<div class="victim-links"><a class="victim-link" href="' + escapeHtml(p.url) + '" target="_blank" rel="noopener noreferrer">View on Telegram →</a></div>'
+          : "";
+        card.innerHTML =
+          '<div class="tg-head"><span class="tg-channel">@' + escapeHtml(p.channel) + '</span>' +
+          (p.older ? '<span class="tg-older" title="Nothing newer in the last ' + data.window_days + ' days">older post</span>' : "") +
+          '<span class="tg-when">' + escapeHtml(tgWhen(p)) + '</span></div>' +
+          '<p class="tg-snippet">' + escapeHtml(p.snippet) + '</p>' + link;
+        tgListEl.appendChild(card);
+      });
+      tgState.offset += data.count;
+      if (tgState.offset < data.total) tgMoreEl.style.display = "";
+    }).catch(function(){
+      tgStatusEl.textContent = "Telegram posts are temporarily unavailable.";
+    });
+  }
+
+  tgMoreEl.addEventListener("click", function(){ loadTelegram(true); });
+  document.getElementById("tg-form").addEventListener("submit", function(e){
+    e.preventDefault();
+    var q = tgInputEl.value.trim();
+    if (q.length > 0 && q.length < 3){ tgStatusEl.textContent = "Enter at least 3 characters."; return; }
+    tgState.q = q;
+    loadTelegram(false);
+  });
+
   // --- Marketplace Trends tab ---
   var marketplaceStatusEl = document.getElementById("marketplace-status");
   var marketplaceListEl = document.getElementById("marketplace-list");
@@ -1664,6 +1799,7 @@
   var views = {
     search: document.getElementById("view-search"),
     ransomware: document.getElementById("view-ransomware"),
+    telegram: document.getElementById("view-telegram"),
     marketplace: document.getElementById("view-marketplace"),
     tools: document.getElementById("view-tools"),
     guide: document.getElementById("view-guide")
@@ -1681,6 +1817,10 @@
       if (tab === "ransomware" && !ransomwareState.loaded){
         ransomwareState.loaded = true;
         loadRansomware();
+      } else if (tab === "telegram" && !tgState.loaded){
+        tgState.loaded = true;
+        loadTgChannels();
+        loadTelegram(false);
       } else if (tab === "marketplace" && !marketplaceLoaded){
         marketplaceLoaded = true;
         loadMarketplaceTrends();

@@ -1,0 +1,9 @@
+[Unit]
+Description=Schedule: DarkNyx public Telegram ingest health check
+
+[Timer]
+OnCalendar=*-*-* 09:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
