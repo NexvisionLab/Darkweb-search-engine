@@ -21,7 +21,7 @@ from PIL import Image
 from pydantic import BaseModel
 import requests
 
-from . import db, hashutil, labels, qr_check, ransomlook_group, ratelimit, redact, scam_classifier, search, summarize, url_check
+from . import db, hashutil, labels, qr_check, ransomlook_group, ratelimit, redact, scam_classifier, search, summarize, telegram_public, url_check
 
 _URL_RE = re.compile(r"https?://[^\s<>\"']+|(?:[a-z0-9-]+\.)+[a-z0-9-]+\.onion(?:/[^\s<>\"']*)?", re.IGNORECASE)
 _STRICT_EMAIL_RE = re.compile(r"^[a-zA-Z0-9_.+-]{1,64}@[a-zA-Z0-9-]{1,63}(\.[a-zA-Z0-9-]{1,63})+$")
@@ -348,6 +348,48 @@ def recent_cves_endpoint(limit: int = Query(20, ge=1, le=100)):
     finally:
         conn.close()
     return {"count": len(cves), "cves": cves}
+
+
+@app.get("/telegram/channels", dependencies=[Depends(_rate_limit("telegram", 30, 60))])
+def telegram_channels_endpoint():
+    """Telegram channels an operator has published to the Free site, with
+    their post counts inside the Free window. See telegram_public.py for
+    what is and is not exposed."""
+    conn = db.get_connection()
+    try:
+        channels = telegram_public.public_channels(conn)
+    finally:
+        conn.close()
+    return {"window_days": telegram_public.FREE_WINDOW_DAYS, "count": len(channels), "channels": channels}
+
+
+@app.get("/telegram/posts", dependencies=[Depends(_rate_limit("telegram", 30, 60))])
+def telegram_posts_endpoint(
+    channel: Optional[str] = Query(None, max_length=32),
+    q: Optional[str] = Query(None, min_length=3, max_length=200),
+    limit: int = Query(20, ge=1, le=50),
+    offset: int = Query(0, ge=0, le=1000),
+):
+    """Recent posts from published Telegram channels, newest first, as short
+    redacted snippets with a link back to the original t.me post. Free sees
+    the last few days, plus a dormant channel's newest few posts flagged
+    `older`; the full retention window, watches and alerts are Pro."""
+    if channel is not None and not telegram_public.is_valid_handle(channel):
+        raise HTTPException(status_code=400, detail="channel must be a Telegram channel handle")
+    query = (q or "").strip() or None
+    conn = db.get_connection()
+    try:
+        posts, total = telegram_public.public_posts(conn, channel=channel, q=query, limit=limit, offset=offset)
+    finally:
+        conn.close()
+    return {
+        "window_days": telegram_public.FREE_WINDOW_DAYS,
+        "channel": channel.lower() if channel else None,
+        "query": query,
+        "total": total,
+        "count": len(posts),
+        "posts": posts,
+    }
 
 
 @app.get("/transparency", dependencies=[Depends(_rate_limit("transparency", 30, 60))])
