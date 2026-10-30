@@ -47,6 +47,10 @@ cd crawler && python3 -c "
 from darkweb_crawler.entity_extract import extract_entities
 print(extract_entities('Contact: t.me/example, BTC: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'))
 "
+
+# unit tests (offline: a fake OpenSearch client, no database)
+python3 -m unittest api.tests.test_clusters
+cd crawler && python3 -m unittest tests.test_dup_group
 ```
 
 For anything touching the API, run it locally (`uvicorn api.main:app

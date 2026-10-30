@@ -1,4 +1,8 @@
+import hashlib
 import os
+import re
+from datetime import datetime, timezone
+
 from opensearchpy import OpenSearch
 
 INDEX_NAME = "pages"
@@ -24,6 +28,12 @@ INDEX_BODY = {
             "image_text": {"type": "text"},
             "published_at": {"type": "date"},
             "crawled_at": {"type": "date"},
+            # Fingerprint of the page's opening text (see dup_group()): pages on different hosts with the same value are copies of
+            # one another, which is what the Clone clusters list groups on.
+            "dup_group": {"type": "keyword"},
+            # The owning domain's rating when the page was indexed. Display only (the clusters' safety mix): hiding suppressed
+            # hosts never relies on it.
+            "safety_rating": {"type": "keyword"},
             "embedding": {"type": "knn_vector", "dimension": EMBEDDING_DIMENSION},
         }
     },
@@ -41,6 +51,26 @@ def get_client():
 def ensure_index(client):
     if not client.indices.exists(index=INDEX_NAME):
         client.indices.create(index=INDEX_NAME, body=INDEX_BODY)
+    else:
+        # an index built before dup_group and safety_rating existed: add them (idempotent) so they are keywords, not dynamic text
+        client.indices.put_mapping(
+            index=INDEX_NAME,
+            body={"properties": {name: INDEX_BODY["mappings"]["properties"][name] for name in ("dup_group", "safety_rating")}},
+        )
+
+
+DUP_MIN_WORDS = 40          # shorter pages are too generic to call copies of each other
+DUP_WORDS = 400             # how much of the opening text is fingerprinted
+
+
+def dup_group(body_text):
+    """A short fingerprint of the first DUP_WORDS words of a page, ignoring case, punctuation and spacing, or None for a page with
+    fewer than DUP_MIN_WORDS words. Two pages with the same value carry the same opening text (an onion mirror of a site, a
+    copied scam kit, a placeholder page)."""
+    words = re.findall(r"[^\W_]+", (body_text or "").lower())
+    if len(words) < DUP_MIN_WORDS:
+        return None
+    return hashlib.sha1(" ".join(words[:DUP_WORDS]).encode("utf-8", "replace")).hexdigest()[:16]
 
 
 def index_page(
@@ -57,6 +87,8 @@ def index_page(
     published_at=None,
     embedding=None,
     image_text=None,
+    safety_rating=None,
+    crawled_at=None,
 ):
     body = {
         "url": url,
@@ -68,7 +100,13 @@ def index_page(
         "pii_present": pii_present,
         "meta_description": meta_description,
         "published_at": published_at.isoformat() if published_at else None,
+        "crawled_at": (crawled_at or datetime.now(timezone.utc)).isoformat(),
     }
+    group = dup_group(body_text)
+    if group:
+        body["dup_group"] = group
+    if safety_rating:
+        body["safety_rating"] = safety_rating
     if embedding is not None:
         body["embedding"] = embedding
     if image_text:

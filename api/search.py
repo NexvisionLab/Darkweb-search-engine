@@ -90,12 +90,18 @@ def _dedupe_mirrors(hits):
     return [item for _, item in deduped]
 
 
-def search_pages(client, query_text, category=None, domain=None, limit=20, offset=0):
+def search_pages(client, query_text, category=None, domain=None, limit=20, offset=0, dup_group=None, exclude_domains=None,
+                 merge_mirrors=True):
+    """dup_group lists the pages of one clone cluster (see api/clusters.py); exclude_domains leaves hosts out inside the query so they
+    are not counted either; merge_mirrors=False keeps every copy instead of folding near-duplicates onto the best-ranked one."""
     filters = []
     if category:
         filters.append({"term": {"content_category": category}})
     if domain:
         filters.append({"term": {"domain": domain}})
+    if dup_group:
+        filters.append({"term": {"dup_group": dup_group}})
+    must_not = [{"terms": {"domain": sorted(exclude_domains)}}] if exclude_domains else []
 
     body = {
         "from": offset,
@@ -122,11 +128,16 @@ def search_pages(client, query_text, category=None, domain=None, limit=20, offse
                 "filter": filters,
             }
         }
+        if must_not:
+            body["query"]["bool"]["must_not"] = must_not
         body["highlight"] = {"fields": {"body_text": {"fragment_size": 200, "number_of_fragments": 1}}}
     else:
         # browse mode: no search term, just filters - sort by recency since
         # there's no relevance score to sort by
-        body["query"] = {"bool": {"filter": filters}} if filters else {"match_all": {}}
+        bool_query = {"filter": filters}
+        if must_not:
+            bool_query["must_not"] = must_not
+        body["query"] = {"bool": bool_query} if (filters or must_not) else {"match_all": {}}
         body["sort"] = [{"crawled_at": {"order": "desc"}}]
 
     response = client.search(index=INDEX_NAME, body=body)
@@ -145,7 +156,8 @@ def search_pages(client, query_text, category=None, domain=None, limit=20, offse
             snippet = source["meta_description"][:200]
         hits.append({**source, "snippet": snippet})
 
-    hits = _dedupe_mirrors(hits)
+    if merge_mirrors:
+        hits = _dedupe_mirrors(hits)
     # embedding was only ever needed for the similarity comparison above -
     # never send a 384-float vector to the API/frontend layer.
     for h in hits:

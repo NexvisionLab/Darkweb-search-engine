@@ -22,6 +22,7 @@ class PageItem(scrapy.Item):
     entities = scrapy.Field()
     embedding = scrapy.Field()
     image_urls = scrapy.Field()
+    safety_rating = scrapy.Field()  # set by DBUpdatePipeline, indexed for the Clone clusters safety mix
 
 
 class DiscoveryItem(scrapy.Item):
