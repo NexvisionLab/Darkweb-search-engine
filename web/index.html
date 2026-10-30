@@ -330,6 +330,37 @@
   .footer-by a{ color:var(--accent-2); text-decoration:none; border-bottom:1px solid transparent; }
   .footer-by a:hover{ border-bottom-color:currentColor; }
   .footer-meta{ margin-top:0.9rem; padding-top:0.9rem; border-top:1px solid var(--line); font-size:0.76rem; }
+
+  /* Clone clusters: a slide-out list of pages whose opening text is identical on several onion sites */
+  .search-extras{ display:flex; gap:0.8rem; margin-top:0.55rem; font-size:0.82rem; }
+  .link-btn{ border:0; background:none; padding:0; font:inherit; color:var(--accent-2); cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+  .link-btn:hover{ color:var(--accent); }
+  .link-btn:focus-visible, .cc-close:focus-visible, .cc-show:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .cc-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:900; }
+  .cc-backdrop[hidden], .cc-panel[hidden]{ display:none; }
+  .cc-panel{
+    position:fixed; top:0; right:0; bottom:0; width:min(760px, 100vw); z-index:901; overflow-y:auto; padding:1.2rem 1.4rem 2rem;
+    background:var(--paper); color:var(--ink); border-left:1px solid var(--line-strong); box-shadow:-8px 0 30px rgba(0,0,0,0.25);
+  }
+  .cc-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:0.9rem; }
+  .cc-head h2{ margin:0; font-size:1.05rem; }
+  .cc-sub{ font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--ink-soft); }
+  .cc-close{ border:1px solid var(--line-strong); background:var(--paper-raised); color:var(--ink); border-radius:6px; padding:0.3rem 0.7rem; cursor:pointer; font:inherit; font-size:0.82rem; }
+  .cc-note{ font-size:0.82rem; color:var(--ink-soft); margin:0.3rem 0 0.9rem; }
+  .cc-controls{ display:flex; flex-wrap:wrap; gap:0.5rem 1rem; margin:0 0 1rem; font-size:0.82rem; color:var(--ink-soft); }
+  .cc-controls label{ display:flex; align-items:center; gap:0.4rem; }
+  .cc-controls select{ font:inherit; font-size:0.82rem; padding:0.28rem 0.5rem; border:1px solid var(--line-strong); border-radius:6px; background:var(--paper-raised); color:var(--ink); }
+  .cc-list{ list-style:none; margin:0; padding:0; }
+  .cc-item{ padding:0.8rem 0; border-bottom:1px solid var(--line); }
+  .cc-title{ font-weight:600; overflow-wrap:anywhere; margin:0 0 0.2rem; }
+  .cc-count{ font-size:0.92rem; margin:0; }
+  .cc-count b{ font-variant-numeric:tabular-nums; }
+  .cc-meta{ font-size:0.78rem; color:var(--ink-faint); margin:0.25rem 0; }
+  .cc-tag{ display:inline-block; margin:0 0.25rem 0.15rem 0; padding:0.05rem 0.45rem; border-radius:999px; font-size:0.68rem; font-family:"IBM Plex Mono",monospace; background:var(--accent-soft); color:var(--ink-soft); }
+  .cc-tag.warn{ background:var(--warn-soft); color:var(--warn); }
+  .cc-tag.bad{ background:var(--bad-soft); color:var(--bad); font-weight:600; }
+  .cc-show{ margin-top:0.35rem; font:inherit; font-size:0.8rem; padding:0.25rem 0.8rem; border-radius:6px; border:1px solid var(--line-strong); background:var(--paper-raised); color:var(--ink); cursor:pointer; }
+  .cc-show:hover{ border-color:var(--accent); color:var(--accent); }
 </style>
 </head>
 <body>
@@ -420,6 +451,7 @@
           <input type="search" id="q" name="q" placeholder="Search onion sites, leaks, marketplaces…" autocomplete="off">
           <button type="submit">Search</button>
         </form>
+        <div class="search-extras"><button type="button" class="link-btn" id="clusters-toggle">Clone clusters</button></div>
       </div>
       <div class="stats-strip" id="stats-strip"></div>
     </header>
@@ -1041,6 +1073,102 @@
       if (input.value.trim()) runSearch();
     });
   }
+
+  // --- Clone clusters ---
+  // Pages whose opening text is identical on several onion sites (a template, a copied scam kit, a mirrored market), biggest first.
+  // Counts and a sample title only, never a host address; "Show these pages" runs the search clone:<code>, which lists every copy
+  // with the normal safety gating.
+  function ccEl(tag, cls, text){
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function ccDate(s){ return s ? String(s).slice(0, 10) : ""; }
+
+  var ccBackdrop = ccEl("div", "cc-backdrop");
+  ccBackdrop.hidden = true;
+  var ccPanel = ccEl("div", "cc-panel");
+  ccPanel.hidden = true;
+  ccPanel.setAttribute("role", "dialog");
+  ccPanel.setAttribute("aria-modal", "true");
+  ccPanel.setAttribute("aria-labelledby", "cc-title");
+  ccPanel.innerHTML = '<div class="cc-head"><div><h2 id="cc-title">Clone clusters</h2><div class="cc-sub">The same page text on many sites</div></div>' +
+    '<button type="button" class="cc-close" id="cc-close">Close</button></div>' +
+    '<p class="cc-note">A page that appears word for word on many onion sites is usually a template: a hosting placeholder, a copied scam or phishing kit, or a mirrored market. Sites with the worst safety rating are marked.</p>' +
+    '<div class="cc-controls"><label for="cc-sort">Sort <select id="cc-sort"><option value="hosts">Most sites</option><option value="pages">Most pages</option><option value="recent">Recently crawled</option></select></label>' +
+    '<label for="cc-min">At least <select id="cc-min"><option value="2">2 sites</option><option value="3" selected>3 sites</option><option value="5">5 sites</option><option value="10">10 sites</option><option value="25">25 sites</option><option value="50">50 sites</option></select></label>' +
+    '<label for="cc-cat">Category <select id="cc-cat"><option value="">Any</option></select></label></div><div id="cc-body"></div>';
+  document.body.appendChild(ccBackdrop);
+  document.body.appendChild(ccPanel);
+  var ccBody = ccPanel.querySelector("#cc-body"), ccToggle = document.getElementById("clusters-toggle");
+  CATEGORIES.forEach(function(c){ ccPanel.querySelector("#cc-cat").appendChild(new Option(c, c)); });
+
+  function closeClusters(){
+    ccPanel.hidden = true;
+    ccBackdrop.hidden = true;
+    try { ccToggle.focus(); } catch (e) {}
+  }
+
+  function loadClusters(){
+    ccBody.innerHTML = "";
+    ccBody.appendChild(ccEl("p", "cc-note", "Loading…"));
+    var url = API + "/clusters?limit=50&sort=" + encodeURIComponent(ccPanel.querySelector("#cc-sort").value) +
+      "&min_hosts=" + encodeURIComponent(ccPanel.querySelector("#cc-min").value);
+    var cat = ccPanel.querySelector("#cc-cat").value;
+    if (cat) url += "&category=" + encodeURIComponent(cat);
+    fetch(url, {credentials: "same-origin"}).then(function(r){ return r.json(); }).then(function(d){
+      ccBody.innerHTML = "";
+      if (d.error){ ccBody.appendChild(ccEl("p", "cc-note", d.error)); return; }
+      if (!d.clusters.length){ ccBody.appendChild(ccEl("p", "cc-note", "No cluster has that many sites. Try fewer.")); return; }
+      // capped: the list is the 500 clusters on the most sites, so the true number is at least that
+      ccBody.appendChild(ccEl("p", "cc-note", d.total.toLocaleString("en-US") + (d.capped ? "+" : "") + " cluster" + (d.total === 1 ? "" : "s") +
+        (d.capped ? ", the 500 on the most sites" : "") + (d.total > d.count ? ", " + d.count + " shown" : "") + "."));
+      var ul = ccEl("ul", "cc-list");
+      d.clusters.forEach(function(c){
+        var li = ccEl("li", "cc-item");
+        li.appendChild(ccEl("p", "cc-title", c.title));
+        var count = ccEl("p", "cc-count");
+        count.appendChild(ccEl("b", null, c.hosts.toLocaleString("en-US")));
+        count.appendChild(document.createTextNode(" sites · "));
+        count.appendChild(ccEl("b", null, c.pages.toLocaleString("en-US")));
+        count.appendChild(document.createTextNode(" pages"));
+        li.appendChild(count);
+        var tags = ccEl("div");
+        c.categories.forEach(function(k){ tags.appendChild(ccEl("span", "cc-tag", k.category + " " + k.count)); });
+        Object.keys(c.safety || {}).forEach(function(label){
+          tags.appendChild(ccEl("span", "cc-tag" + (label === "Dangerous" ? " bad" : (label === "Suspicious" ? " warn" : "")), label + " " + c.safety[label]));
+        });
+        li.appendChild(tags);
+        var meta = [c.last_crawled ? "last crawled " + ccDate(c.last_crawled) : "", c.language || ""].filter(Boolean);
+        if (meta.length) li.appendChild(ccEl("p", "cc-meta", meta.join(" · ")));
+        var show = ccEl("button", "cc-show", "Show these pages");
+        show.type = "button";
+        show.addEventListener("click", function(){
+          closeClusters();
+          input.value = "clone:" + c.id;
+          if (entityTypeEl) entityTypeEl.value = "";
+          state.category = null;
+          renderChips();
+          runSearch();
+        });
+        li.appendChild(show);
+        ul.appendChild(li);
+      });
+      ccBody.appendChild(ul);
+    }).catch(function(){ ccBody.innerHTML = ""; ccBody.appendChild(ccEl("p", "cc-note", "The list is temporarily unavailable.")); });
+  }
+
+  ccPanel.querySelector("#cc-close").addEventListener("click", closeClusters);
+  ccBackdrop.addEventListener("click", closeClusters);
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && !ccPanel.hidden) closeClusters(); });
+  ["cc-sort", "cc-min", "cc-cat"].forEach(function(id){ ccPanel.querySelector("#" + id).addEventListener("change", loadClusters); });
+  ccToggle.addEventListener("click", function(){
+    ccPanel.hidden = false;
+    ccBackdrop.hidden = false;
+    ccPanel.querySelector("#cc-close").focus();
+    loadClusters();
+  });
 
   // --- Ransomware Activity tab ---
   var ransomwareState = { group: null, loaded: false };

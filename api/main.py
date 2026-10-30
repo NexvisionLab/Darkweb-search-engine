@@ -11,6 +11,7 @@ import threading
 import os
 import re
 import secrets
+import time
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -21,7 +22,7 @@ from PIL import Image
 from pydantic import BaseModel
 import requests
 
-from . import db, hashutil, labels, qr_check, ransomlook_group, ratelimit, redact, scam_classifier, search, summarize, url_check
+from . import clusters, db, hashutil, labels, qr_check, ransomlook_group, ratelimit, redact, scam_classifier, search, summarize, url_check
 
 _URL_RE = re.compile(r"https?://[^\s<>\"']+|(?:[a-z0-9-]+\.)+[a-z0-9-]+\.onion(?:/[^\s<>\"']*)?", re.IGNORECASE)
 _STRICT_EMAIL_RE = re.compile(r"^[a-zA-Z0-9_.+-]{1,64}@[a-zA-Z0-9-]{1,63}(\.[a-zA-Z0-9-]{1,63})+$")
@@ -218,6 +219,24 @@ def stats_endpoint():
         conn.close()
 
 
+_CLONE_RE = re.compile(r"(?<!\S)clone:(\S*)", re.IGNORECASE)
+_CLONE_CODE_RE = re.compile(r"^[0-9a-f]{16}$")
+
+
+def _split_clone(q):
+    """(cluster code, the rest of the query, error) for a query that may carry the clone:<code> operator. The code is the 16-character
+    id of a group in the Clone clusters list; the rest of the query is searched as usual inside that group."""
+    if not q:
+        return None, q, None
+    m = _CLONE_RE.search(q)
+    if not m:
+        return None, q, None
+    code = m.group(1).lower()
+    if not _CLONE_CODE_RE.match(code):
+        return None, q, "clone: needs the 16-character code from the Clone clusters list"
+    return code, (q[:m.start()] + " " + q[m.end():]).strip(), None
+
+
 # _daily_search_limit is temporarily disabled - kept defined above so it's
 # a one-line change to re-enable, not a rebuild.
 @app.get("/search", dependencies=[Depends(_rate_limit("search", 30, 60))])
@@ -231,8 +250,13 @@ def search_endpoint(
 ):
     if category is not None and category not in VALID_CATEGORIES:
         return {"error": f"invalid category, must be one of {sorted(VALID_CATEGORIES)}"}
-    if not (q or "").strip() and not category and not domain:
+    clone, q_text, clone_error = _split_clone(q)
+    if clone_error:
+        return {"error": clone_error}
+    if not (q_text or "").strip() and not category and not domain and not clone:
         return {"error": "provide a search term q, or at least a category/domain to browse"}
+    if clone and semantic:
+        return {"error": "clone: cannot be combined with similar-meaning search"}
 
     client = search.get_client()
     if semantic:
@@ -240,8 +264,17 @@ def search_endpoint(
             return {"error": "semantic search needs a query term q"}
         hits, total = search.semantic_search(client, q, category=category, limit=limit)
     else:
+        exclude = None
+        if clone:
+            # one cluster's copies are listed, not merged, and a suppressed host is left out inside the query so it is not counted
+            conn = db.get_connection()
+            try:
+                exclude = db.get_suppressed_hosts(conn, labels.SUPPRESSED_RATINGS)
+            finally:
+                conn.close()
         hits, total = search.search_pages(
-            client, q, category=category, domain=domain, limit=limit, offset=offset
+            client, q_text, category=category, domain=domain, limit=limit, offset=offset,
+            dup_group=clone, exclude_domains=exclude, merge_mirrors=not clone,
         )
 
     hosts = sorted({hit["domain"] for hit in hits if hit.get("domain")})
@@ -272,6 +305,47 @@ def search_endpoint(
         )
 
     return {"query": q or "", "total": total, "count": len(results), "results": results}
+
+
+_CLUSTER_CACHE = {}
+_CLUSTER_TTL = 600
+
+
+@app.get("/clusters", dependencies=[Depends(_rate_limit("clusters", 20, 60))])
+def clusters_endpoint(
+    min_hosts: int = Query(3, ge=2, le=1000, description="only clusters present on at least this many sites"),
+    category: Optional[str] = Query(None),
+    sort: str = Query("hosts", pattern="^(hosts|pages|recent)$"),
+    limit: int = Query(30, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+):
+    """Clone clusters: the groups of pages with identical opening text on several hosts (a template page, a copied scam kit, a mirrored
+    market), biggest first. Counts, a sample title, categories, the safety mix and the last crawl date; never a host address. Cached for
+    10 minutes. To see the pages of one cluster, search `clone:<id>`."""
+    if category is not None and category not in VALID_CATEGORIES:
+        return {"error": f"invalid category, must be one of {sorted(VALID_CATEGORIES)}"}
+    if offset + limit > clusters.MAX_BUCKETS:
+        return {"error": f"clusters are limited to the first {clusters.MAX_BUCKETS}"}
+    key = (min_hosts, category)       # the sort is applied below, inside the cached window, so it is not part of the key
+    cached = _CLUSTER_CACHE.get(key)
+    now = time.time()
+    if cached and now - cached[0] < _CLUSTER_TTL:
+        items = cached[1]
+    else:
+        conn = db.get_connection()
+        try:
+            suppressed = db.get_suppressed_hosts(conn, labels.SUPPRESSED_RATINGS)
+        finally:
+            conn.close()
+        body = clusters.build_body(min_hosts, category, sort, suppressed, size=clusters.MAX_BUCKETS)
+        items, _total = clusters.shape(search.get_client().search(index=search.INDEX_NAME, body=body), redact.redact, limit=clusters.MAX_BUCKETS)
+        _CLUSTER_CACHE[key] = (now, items)
+        if len(_CLUSTER_CACHE) > 60:
+            _CLUSTER_CACHE.pop(next(iter(_CLUSTER_CACHE)))
+    items = clusters.sort_items(items, sort)
+    # capped: the window is full, so more clusters than `total` exist (the list is the MAX_BUCKETS present on the most sites)
+    return {"count": len(items[offset:offset + limit]), "total": len(items), "capped": len(items) >= clusters.MAX_BUCKETS,
+            "min_hosts": min_hosts, "sort": sort, "clusters": items[offset:offset + limit]}
 
 
 @app.get("/entities/search", dependencies=[Depends(_rate_limit("entities", 30, 60))])

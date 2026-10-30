@@ -146,6 +146,7 @@ class DBUpdatePipeline:
                     categories, malware_flag=malware_flag, clone_suspect=clone_suspect
                 )
             db.update_domain_safety_rating(self.conn, item["domain_id"], rating)
+            item["safety_rating"] = rating
 
         if item.get("prices"):
             db.clear_page_prices(self.conn, item["page_id"])
@@ -179,5 +180,6 @@ class OpenSearchPipeline:
             item.get("meta_description"),
             item.get("published_at"),
             item.get("embedding"),
+            safety_rating=item.get("safety_rating"),
         )
         return item

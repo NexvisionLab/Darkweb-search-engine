@@ -30,6 +30,14 @@ def get_domain_meta(conn, hosts):
     }
 
 
+def get_suppressed_hosts(conn, ratings):
+    """Host names whose rating is one of `ratings` (the suppressed tier), read fresh from the database so a host rated after its pages
+    were indexed is still left out of any list that counts or shows pages."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT host FROM domains WHERE safety_rating = ANY(%s)", (sorted(ratings),))
+        return sorted(row[0] for row in cur.fetchall())
+
+
 def get_domain_summary(conn, host):
     with conn.cursor() as cur:
         cur.execute(

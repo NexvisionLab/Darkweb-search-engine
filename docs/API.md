@@ -28,6 +28,22 @@ The core search endpoint.
 
 Each result includes a `safety_rating` object (`{"label": "...", "severity": "good"\|"neutral"\|"warn"\|"bad"}`). A result whose domain safety rating is `csam-confirmed` is silently excluded from the result set entirely — not gated, not shown at all.
 
+A query can also be `clone:<code>`, alone or next to other words: it lists the pages of one clone cluster (see `GET /clusters`), every copy rather than one per mirror. `<code>` is a cluster's 16-character `id`. It cannot be combined with `semantic=true`.
+
+### `GET /clusters`
+Clone clusters: groups of pages whose opening text is identical on several onion sites (a hosting placeholder, a copied scam or phishing kit, a mirrored market), biggest first.
+
+| Param | Required | Notes |
+|---|---|---|
+| `min_hosts` | no | Only clusters present on at least this many sites. 2–1000, default 3. |
+| `category` | no | One of the values in `VALID_CATEGORIES`. |
+| `sort` | no | `hosts` (default), `pages` or `recent` (last crawled). |
+| `limit` / `offset` | no | 1–100, default 30; `offset + limit` must stay within 500. |
+
+Each cluster has an `id`, the number of `pages` and `hosts`, a sample `title`, its top `categories`, a `safety` mix (public labels, from the rating each page was indexed with), `last_crawled` and `language`. A host address is never returned. The list is the 500 clusters present on the most sites, sorted as asked inside that window; `capped` is `true` when the window is full (more clusters exist than `total`). Hosts rated `csam-confirmed` are left out inside the query, by host name read from the database, so they are not counted either. Cached for 10 minutes.
+
+Pages indexed before this feature need `crawler/scripts/backfill_cluster_fields.py` (or a reindex) before they appear in a cluster.
+
 ### `GET /entities/search`
 Search by a structured entity type extracted from crawled pages.
 

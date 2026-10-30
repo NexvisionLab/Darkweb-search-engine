@@ -12,14 +12,14 @@ cur = conn.cursor()
 cur.execute(
     """
     SELECT p.id, p.url, d.host, p.title, p.body_text, p.content_category, p.language, p.pii_present,
-           p.meta_description, p.published_at
+           p.meta_description, p.published_at, d.safety_rating, p.crawled_at
     FROM pages p
     JOIN domains d ON d.id = p.domain_id
     """
 )
 rows = cur.fetchall()
 embedded_count = 0
-for page_id, url, domain, title, body_text, category, language, pii_present, meta_description, published_at in rows:
+for page_id, url, domain, title, body_text, category, language, pii_present, meta_description, published_at, rating, crawled_at in rows:
     try:
         embedding = classification.embed(f"{title or ''}. {(body_text or '')[:2000]}")
     except Exception:
@@ -28,7 +28,7 @@ for page_id, url, domain, title, body_text, category, language, pii_present, met
         embedded_count += 1
     search.index_page(
         client, page_id, url, domain, title, body_text, category, language, pii_present,
-        meta_description, published_at, embedding,
+        meta_description, published_at, embedding, safety_rating=rating, crawled_at=crawled_at,
     )
 
 print(f"Reindexed {len(rows)} pages, {embedded_count} with embeddings")
