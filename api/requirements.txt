@@ -8,3 +8,4 @@ python-multipart>=0.0.9
 sentence-transformers>=3.0
 pyzbar>=0.1.9
 requests>=2.32
+httpx>=0.27
