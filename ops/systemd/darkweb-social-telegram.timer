@@ -1,0 +1,9 @@
+[Unit]
+Description=Schedule: DarkNyx public Telegram channel social ingest
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+
+[Install]
+WantedBy=timers.target
