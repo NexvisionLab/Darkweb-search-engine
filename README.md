@@ -25,6 +25,12 @@ built as an add-on gateway that this codebase never needs and never imports.
   RansomLook, per-group "known mirrors" info (live up/down status, safety-
   reviewed mirror screenshots), and per-victim detail.
 - **Marketplace price trend tracking.**
+- **Clone clusters** — the biggest groups of pages whose opening text is
+  identical on many onion sites: a hosting placeholder, a copied scam or
+  phishing kit, a mirrored market. Each cluster shows how many pages and
+  sites carry it, a sample title, its categories and the safety mix of the
+  sites; search `clone:<id>` to list every copy. Host addresses are never
+  shown in the list.
 - **Free OSINT safety tools** — see [below](#free-osint-safety-tools) for what
   each one actually does.
 - **Watchlist alerts** — a webhook fires the moment a keyword or regex is
