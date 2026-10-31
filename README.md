@@ -42,25 +42,30 @@ built as an add-on gateway that this codebase never needs and never imports.
 ## Architecture
 
 ```
-                          ┌─────────────┐
-                          │   web/      │  static single-page frontend
-                          └──────┬──────┘
-                                 │ HTTPS
-                          ┌──────▼──────┐
-                          │   api/      │  FastAPI, read-only public surface
-                          └──────┬──────┘
-                    ┌────────────┼────────────┐
-                    ▼            ▼            ▼
-              ┌─────────┐ ┌───────────┐ ┌──────────┐
-              │Postgres │ │OpenSearch │ │  Valkey   │  rate limiting
-              └─────────┘ └───────────┘ └──────────┘
-                    ▲
-                    │ writes
-              ┌─────┴──────┐        ┌──────────────┐
-              │  crawler/   │───────▶│ Tor + Privoxy │  outbound .onion access
-              │  (Scrapy)   │        └──────────────┘
-              └─────────────┘
+                          ┌───────────┐
+                          │   web/    │  static single-page frontend
+                          └─────┬─────┘
+                                │ HTTPS, /api/*
+                          ┌─────▼─────┐
+                          │   api/    │  FastAPI public API
+                          └─────┬─────┘
+                   ┌────────────┼─────────────┐
+                   ▼            ▼             ▼
+              ┌─────────┐ ┌───────────┐  ┌─────────┐
+              │Postgres │ │OpenSearch │  │ Valkey  │  rate limiting
+              └────┬────┘ └─────┬─────┘  └─────────┘
+                   ▲            ▲
+                   │ writes     │ indexes
+              ┌────┴────────────┴──┐        ┌───────────────┐
+              │      crawler/      │───────▶│ Tor + Privoxy │ outbound .onion access
+              │      (Scrapy)      │        └───────────────┘
+              └────────────────────┘
 ```
+
+The crawler stores every page in Postgres and indexes it into OpenSearch as it
+goes. The API reads both, and uses Valkey for per-IP rate limits. The optional
+on-demand summarizer is a separate llama.cpp server that the API calls over HTTP
+(`SUMMARIZER_URL`); it is not part of `docker-compose.yml`.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full component
 breakdown, [docs/API.md](docs/API.md) for the API reference, and
@@ -104,10 +109,11 @@ search result:
    content classification, reused rather than loading a second model) and
    indexed into OpenSearch alongside the raw text, so one query serves both
    full-text and semantic (k-NN vector) search.
-6. **Serving.** The `api/` FastAPI app is entirely read-only against that
-   index and Postgres — it has no crawling code and no write path back into
-   the pipeline, so it's safe to deploy and scale independently of the
-   crawler.
+6. **Serving.** The `api/` FastAPI app only reads the search index, and it has
+   no crawling code, so it can be deployed and scaled independently of the
+   crawler. Its writes to Postgres are limited to the small user and
+   moderation tables (watchlists, site reports, domain-verification claims,
+   digest subscriptions) and a moderator's safety-rating override.
 
 ### Free OSINT safety tools
 
@@ -151,29 +157,95 @@ internally.
 
 ## Quickstart (local development)
 
-Requires Docker, Python 3.11+, and a Tor-capable network path.
+This runs the whole stack on one machine: the backing services in Docker, and the crawler, the API and
+the frontend as ordinary processes. Needs Docker with Compose, Python 3.11 or newer, and several GB of
+free disk (the Python packages include PyTorch, and the first crawl downloads the `all-MiniLM-L6-v2`
+model from Hugging Face). The commands are for a Unix shell; on Windows use Git Bash or WSL, or see the notes
+below each step.
+
+**1. Get the code and create your settings**
 
 ```bash
-git clone <this-repo>
-cd darknyx
-cp .env.example .env        # fill in real values - see the comments in the file
-docker compose up -d postgres opensearch redis tor-privoxy-0
-psql "postgresql://darknyx:<password>@localhost:5432/darknyx" -f db/schema.sql
-
-cd api && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/uvicorn api.main:app --reload --port 8000
-
-# in a second terminal
-cd crawler && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/scrapy crawl onion -a seeds_file=../onions_list/onions.txt -s DEPTH_LIMIT=1
-
-# in a third terminal, serve web/ with any static file server
-python3 -m http.server 8080 --directory web
+git clone https://github.com/NexvisionLab/Darkweb-search-engine.git
+cd Darkweb-search-engine
+cp .env.example .env
 ```
 
-Open `web/index.html` (proxied through your static server) — searches will
-be empty until the crawler has run at least once and `reindex_opensearch.py`
-has synced Postgres into the search index.
+Open `.env` and set a real `POSTGRES_PASSWORD`. The other defaults already point at the local
+containers. `ADMIN_TOKEN` is only needed for the `/admin/*` endpoints, and the summarizer, SMTP and
+surface-web settings are optional.
+
+**2. Start the backing services**
+
+```bash
+docker compose up -d postgres opensearch redis tor-privoxy-0
+docker compose ps        # wait until postgres shows "healthy"
+```
+
+The first run builds the Tor image and pulls the others. On Linux, if `opensearch` exits straight away,
+raise the kernel limit it needs: `sudo sysctl -w vm.max_map_count=262144`.
+
+**3. Create the database tables**
+
+Postgres does not load `db/` by itself. The schema file is safe to run twice:
+
+```bash
+set -a; . ./.env; set +a
+docker exec -i darkweb-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < db/schema.sql
+```
+
+The `set -a; . ./.env; set +a` line loads your settings into the current shell. **The Python programs do
+not read `.env` themselves**, so run step 4 onward in a shell where this has been done. (PowerShell:
+`Get-Content .env | Where-Object { $_ -match '^\s*[^#\s].*=' } | ForEach-Object { $k, $v = $_ -split '=', 2; Set-Item "env:$k" $v.Trim('"') }`.)
+
+**4. Run the crawler**
+
+```bash
+cd crawler
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/scrapy crawl onion -a seeds_file=../onions_list/onions.txt -s DEPTH_LIMIT=1
+```
+
+Let it run for a few minutes, then stop it with Ctrl+C. The seed list has about 19,000 addresses and
+most are dead, so expect many failures and few pages at first. The crawler creates the search index when
+it starts and indexes each page as it stores it. On Windows the interpreter paths are `.venv\Scripts\pip`
+and `.venv\Scripts\scrapy`.
+
+**5. Run the API** (open a second terminal, in the repository root, after the `set -a` line above)
+
+```bash
+python3 -m venv api/.venv && api/.venv/bin/pip install -r api/requirements.txt
+api/.venv/bin/uvicorn api.main:app --reload --port 8000
+```
+
+Start it from the repository root, not from inside `api/`: the code uses package imports, so
+`uvicorn api.main:app` fails with `No module named 'api'` anywhere else. The QR checker needs the zbar
+library; on Debian or Ubuntu install it first with `sudo apt install libzbar0` (macOS: `brew install zbar`).
+Check it works with `curl "http://127.0.0.1:8000/stats"`.
+
+**6. Open the frontend** (a third terminal, repository root)
+
+```bash
+python3 ops/dev_server.py
+```
+
+Then browse to <http://127.0.0.1:8080>. The page calls `/api/...`, and in production nginx forwards that
+to the API. `ops/dev_server.py` does the same locally (it serves `web/` and forwards `/api/*` to port
+8000, so a plain `python3 -m http.server` will not do, because every search would fail). Use
+`--api http://127.0.0.1:PORT` if you run the API elsewhere.
+
+**If something does not work**
+
+| Symptom | Likely cause |
+|---|---|
+| `KeyError: 'POSTGRES_USER'` | The settings were not loaded into this shell. Repeat the `set -a; . ./.env; set +a` line. |
+| A search returns a 500 error or nothing | OpenSearch is not running, or the crawler has not stored a page yet, so the search index does not exist. Check `docker compose ps`, then run step 4 until it has saved some pages. || `connection refused` on 5432, 9200 or 6379 | A container is not up. Check `docker compose ps` and `docker compose logs <service>`. |
+| `No module named 'api'` | The API was started from inside `api/`. Start it from the repository root. |
+| The page loads but every request fails with 502 | The API is not running on port 8000, or `dev_server.py` was given a different `--api`. |
+
+To rebuild the search index from Postgres (after changing the classifier or the index fields), run
+`cd crawler && .venv/bin/python scripts/reindex_opensearch.py`. **It deletes the existing index and
+rebuilds it**, so searches are empty while it runs. A normal crawl does not need it.
 
 ## Repository layout
 
@@ -184,7 +256,7 @@ has synced Postgres into the search index.
 | `web/` | The frontend — one static HTML file, no build step. |
 | `db/schema.sql` | Full Postgres schema, idempotent (`CREATE TABLE IF NOT EXISTS` / `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`) — safe to re-run. |
 | `tor-proxy/` | Docker image for the Tor + Privoxy HTTP-proxy bridge the crawler routes through. |
-| `ops/` | systemd units, nginx config, and TLS/networking fixes for a real production deployment. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). |
+| `ops/` | systemd units, nginx config, and TLS/networking fixes for a real production deployment (see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)), plus `dev_server.py` for local development. |
 | `docker-compose.yml` | Postgres, OpenSearch, Valkey, and the Tor proxy — the four backing services. |
 | `onions_list/onions.txt` | A large (~19,000-address) unverified `.onion` URL list to bootstrap a first crawl. See [onions_list/README.md](onions_list/README.md) — real, but not liveness-checked; the crawl pipeline sorts out what's actually reachable. |
 
