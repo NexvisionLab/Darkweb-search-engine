@@ -157,13 +157,75 @@ internally.
 
 ## Quickstart (local development)
 
-This runs the whole stack on one machine: the backing services in Docker, and the crawler, the API and
-the frontend as ordinary processes. Needs Docker with Compose, Python 3.11 or newer, and several GB of
-free disk (the Python packages include PyTorch, and the first crawl downloads the `all-MiniLM-L6-v2`
-model from Hugging Face). The commands are for a Unix shell; on Windows use Git Bash or WSL, or see the notes
-below each step.
+By the end of this guide you will have your own copy of the search engine running on your computer,
+and you will be able to search it in your browser at <http://127.0.0.1:8080>. Most of the time is spent
+waiting for downloads. You do not need to know how the code works.
 
-**1. Get the code and create your settings**
+### What you are installing
+
+The engine is a handful of small programs that work together. Four of them run inside Docker (one
+command starts all four), and three are ordinary programs you start yourself.
+
+**Four services that run in Docker.** You do not install these separately.
+
+| Service | What it does, in plain words |
+|---|---|
+| **Postgres** | The database. It remembers every site and page the crawler has read, the details pulled out of them (Bitcoin addresses, IP addresses, prices) and each site's safety rating. |
+| **OpenSearch** | The search index. It is what makes searching fast, and lets you search by words and by meaning. |
+| **Valkey** | A small, very fast memory store (it works like Redis). The API uses it to count requests, so one visitor cannot flood the service. |
+| **Tor + Privoxy** | The door to the dark web. Tor is the network that `.onion` addresses live on. Privoxy turns Tor's connection into an ordinary web proxy that the crawler can use. |
+
+**Three programs you start yourself.**
+
+| Program | What it does | Folder |
+|---|---|---|
+| **Crawler** | Visits `.onion` sites through Tor, reads each page, sorts it into a category, rates the site's safety, and saves the result in Postgres and OpenSearch. | `crawler/` |
+| **API** | Answers searches. It only reads what the crawler has saved in Postgres and OpenSearch; it does not crawl anything. | `api/` |
+| **Web page** | The search page you see in your browser. It asks the API for everything it shows. | `web/` |
+
+So the flow is: the **crawler** fills the **database** and the **search index**, the **API** reads
+them, and the **web page** asks the API. Until the crawler has saved some pages there is nothing to
+search.
+
+Some features are optional and you can ignore them for now: the AI page summarizer (needs a separate
+language-model server), the weekly email digest, the `/admin/*` moderation endpoints, and crawling
+ordinary (non-onion) websites.
+
+### What you need first
+
+| You need | Why | Check that you have it | Where to get it |
+|---|---|---|---|
+| **Git** | To download the code | `git --version` | <https://git-scm.com/downloads> |
+| **Docker** with Compose | To run the four services | `docker compose version` | <https://docs.docker.com/get-docker/> (Docker Desktop on Windows and macOS) |
+| **Python 3.11 or newer** | To run the crawler, the API and the web page | `python3 --version` (on Windows: `python --version`) | <https://www.python.org/downloads/> |
+| **A terminal** | To type the commands below | macOS and Linux have one. On Windows use **Git Bash** (installed with Git) or **WSL**. | |
+
+Your computer should have about 8 GB of memory and several GB of free disk space, and it needs an
+internet connection. Linux and macOS users also need one small library for the QR-code checker:
+`sudo apt install libzbar0` on Debian or Ubuntu, or `brew install zbar` on macOS.
+
+**The Python packages** (the libraries the programs are built from) are installed for you in steps 4
+and 5. Each program gets its own private folder called a *virtual environment* (`.venv`), so nothing
+is installed system-wide and you can delete it at any time. The main ones:
+
+| Package | Used by | What for |
+|---|---|---|
+| Scrapy | Crawler | The crawling framework |
+| FastAPI and Uvicorn | API | The web service and the server that runs it |
+| psycopg | Crawler, API | Talking to Postgres |
+| opensearch-py | Crawler, API | Talking to OpenSearch |
+| redis | API | Talking to Valkey |
+| sentence-transformers | Crawler, API | The small AI model that sorts pages into categories and powers search by meaning. It brings in PyTorch, which is the biggest download. |
+| Pillow, pyzbar | Crawler, API | Reading images and QR codes |
+
+The first time a program needs the AI model (`all-MiniLM-L6-v2`), it downloads it once from Hugging
+Face and keeps it.
+
+### Install, step by step
+
+Type each command exactly as shown. Lines that start with `#` are explanations, not commands.
+
+**1. Get the code and create your settings file**
 
 ```bash
 git clone https://github.com/NexvisionLab/Darkweb-search-engine.git
@@ -171,81 +233,119 @@ cd Darkweb-search-engine
 cp .env.example .env
 ```
 
-Open `.env` and set a real `POSTGRES_PASSWORD`. The other defaults already point at the local
-containers. `ADMIN_TOKEN` is only needed for the `/admin/*` endpoints, and the summarizer, SMTP and
-surface-web settings are optional.
+`.env` is a plain text file that holds your settings. Open it in any text editor and change
+`POSTGRES_PASSWORD` to a password of your own. Leave the rest as it is: the defaults already point at
+the services you are about to start. (`ADMIN_TOKEN` and the summarizer, email and surface-web settings
+only matter for the optional features above.)
 
-**2. Start the backing services**
+**2. Start the four services**
 
 ```bash
 docker compose up -d postgres opensearch redis tor-privoxy-0
-docker compose ps        # wait until postgres shows "healthy"
+docker compose ps
 ```
 
-The first run builds the Tor image and pulls the others. On Linux, if `opensearch` exits straight away,
-raise the kernel limit it needs: `sudo sysctl -w vm.max_map_count=262144`.
+The first run downloads and builds the images, which takes a few minutes. Run `docker compose ps`
+again until `postgres` says `healthy`. All four should show as running. On Linux, if `opensearch`
+stops straight away, raise the memory-map limit it needs: `sudo sysctl -w vm.max_map_count=262144`.
 
 **3. Create the database tables**
 
-Postgres does not load `db/` by itself. The schema file is safe to run twice:
+Postgres starts empty. This command fills it with the tables the engine needs, and it is safe to run
+twice:
 
 ```bash
 set -a; . ./.env; set +a
 docker exec -i darkweb-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < db/schema.sql
 ```
 
-The `set -a; . ./.env; set +a` line loads your settings into the current shell. **The Python programs do
-not read `.env` themselves**, so run step 4 onward in a shell where this has been done. (PowerShell:
-`Get-Content .env | Where-Object { $_ -match '^\s*[^#\s].*=' } | ForEach-Object { $k, $v = $_ -split '=', 2; Set-Item "env:$k" $v.Trim('"') }`.)
+You will see a list of `CREATE TABLE` lines. The first command copies your settings from `.env` into
+the current terminal. **The Python programs do not read `.env` themselves**, so every terminal that
+runs step 4, 5 or 6 must have had that line typed in it first. (PowerShell does not understand it; use
+this instead: `Get-Content .env | Where-Object { $_ -match '^\s*[^#\s].*=' } | ForEach-Object { $k, $v = $_ -split '=', 2; Set-Item "env:$k" $v.Trim('"') }`.)
 
 **4. Run the crawler**
 
 ```bash
 cd crawler
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 .venv/bin/scrapy crawl onion -a seeds_file=../onions_list/onions.txt -s DEPTH_LIMIT=1
 ```
 
-Let it run for a few minutes, then stop it with Ctrl+C. The seed list has about 19,000 addresses and
-most are dead, so expect many failures and few pages at first. The crawler creates the search index when
-it starts and indexes each page as it stores it. On Windows the interpreter paths are `.venv\Scripts\pip`
-and `.venv\Scripts\scrapy`.
+The first two commands create the private environment and install the packages (this is the slow
+part, often several minutes). The last starts the crawl. On Windows the programs are in
+`.venv\Scripts\` instead of `.venv/bin/`.
 
-**5. Run the API** (open a second terminal, in the repository root, after the `set -a` line above)
+The seed list has about 19,000 `.onion` addresses, and most of them are no longer online, so you will
+see many timeouts and errors. That is normal. Let it run for a few minutes, then press **Ctrl+C** to
+stop it. To see how many pages it saved, open a second terminal in the repository folder and run:
 
 ```bash
-python3 -m venv api/.venv && api/.venv/bin/pip install -r api/requirements.txt
+set -a; . ./.env; set +a
+docker exec -i darkweb-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT count(*) FROM pages;"
+```
+
+Any number above zero means the crawler works. (The crawler also creates the search index the first
+time it starts, and indexes every page as it saves it.)
+
+**5. Run the API** (a terminal in the repository folder, with the `set -a` line typed in it)
+
+```bash
+python3 -m venv api/.venv
+api/.venv/bin/pip install -r api/requirements.txt
 api/.venv/bin/uvicorn api.main:app --reload --port 8000
 ```
 
-Start it from the repository root, not from inside `api/`: the code uses package imports, so
-`uvicorn api.main:app` fails with `No module named 'api'` anywhere else. The QR checker needs the zbar
-library; on Debian or Ubuntu install it first with `sudo apt install libzbar0` (macOS: `brew install zbar`).
-Check it works with `curl "http://127.0.0.1:8000/stats"`.
+Leave it running. Start it from the repository folder, not from inside `api/`, or it fails with
+`No module named 'api'`. To check it, open <http://127.0.0.1:8000/stats> in a browser, or run
+`curl "http://127.0.0.1:8000/stats"` in another terminal. You should get a short block of counts
+(sites, pages, categories) back, not an error.
 
-**6. Open the frontend** (a third terminal, repository root)
+**6. Open the web page** (another terminal, in the repository folder)
 
 ```bash
 python3 ops/dev_server.py
 ```
 
-Then browse to <http://127.0.0.1:8080>. The page calls `/api/...`, and in production nginx forwards that
-to the API. `ops/dev_server.py` does the same locally (it serves `web/` and forwards `/api/*` to port
-8000, so a plain `python3 -m http.server` will not do, because every search would fail). Use
-`--api http://127.0.0.1:PORT` if you run the API elsewhere.
+Then go to <http://127.0.0.1:8080> and try a search. The page asks for its data at `/api/...`. In a
+real deployment the nginx web server forwards that to the API, and `ops/dev_server.py` does the same
+job on your computer. Use it instead of a plain `python3 -m http.server`, which has no `/api`, so
+every search would fail. If your API runs on another port, add `--api http://127.0.0.1:PORT`.
 
-**If something does not work**
+### Stopping, restarting and starting over
 
-| Symptom | Likely cause |
+- **Stop a program** (crawler, API or web page): click its terminal and press **Ctrl+C**.
+- **Stop the four services** but keep your data: `docker compose stop`.
+- **Start again another day:** `docker compose up -d postgres opensearch redis tor-privoxy-0`, then
+  steps 5 and 6 (and step 4 to crawl more). Each new terminal needs the `set -a; . ./.env; set +a`
+  line again. Your pages are still there. You only repeat steps 1 to 3
+  on a new computer.
+- **Erase everything and start over:** `docker compose down -v`. **This deletes all stored pages and
+  the search index.** The next start is empty again.
+
+### If something does not work
+
+| What you see | Likely cause and fix |
 |---|---|
-| `KeyError: 'POSTGRES_USER'` | The settings were not loaded into this shell. Repeat the `set -a; . ./.env; set +a` line. |
-| A search returns a 500 error or nothing | OpenSearch is not running, or the crawler has not stored a page yet, so the search index does not exist. Check `docker compose ps`, then run step 4 until it has saved some pages. || `connection refused` on 5432, 9200 or 6379 | A container is not up. Check `docker compose ps` and `docker compose logs <service>`. |
-| `No module named 'api'` | The API was started from inside `api/`. Start it from the repository root. |
+| `KeyError: 'POSTGRES_USER'` | The settings were not loaded into this terminal. Type the `set -a; . ./.env; set +a` line again (step 3). |
+| A search gives a 500 error or no results | OpenSearch is not running, or the crawler has not saved a page yet, so the search index does not exist. Run `docker compose ps`, then run step 4 until it has saved some pages. |
+| `connection refused` on port 5432, 9200 or 6379 | A service is not running. Run `docker compose ps`, then `docker compose logs postgres` (or `opensearch`, `redis`) to see why. |
+| `No module named 'api'` | The API was started from inside `api/`. Start it from the repository folder. |
 | The page loads but every request fails with 502 | The API is not running on port 8000, or `dev_server.py` was given a different `--api`. |
+| The crawler finds nothing for a long time | Normal for the first minutes: Tor is slow and most seed addresses are dead. Check the tor service with `docker compose logs tor-privoxy-0`. |
 
 To rebuild the search index from Postgres (after changing the classifier or the index fields), run
 `cd crawler && .venv/bin/python scripts/reindex_opensearch.py`. **It deletes the existing index and
 rebuilds it**, so searches are empty while it runs. A normal crawl does not need it.
+
+### Before you crawl
+
+Dark-web sites include scams, adult material and content that is illegal in many countries. The
+crawler reads the text of whatever it reaches. The engine rates sites, gates results, and treats
+child-abuse material specially (see "Safety rating" above), but nothing guarantees you will not store
+something disturbing. Run it on a machine and network you are comfortable using, and check the laws
+that apply to you.
 
 ## Repository layout
 
